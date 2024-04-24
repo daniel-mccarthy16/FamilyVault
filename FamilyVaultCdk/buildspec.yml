@@ -1,0 +1,30 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+    commands:
+      - npm install
+  pre_build:
+    commands:
+      - echo Checking for required environment variables...
+      - printenv
+  build:
+    commands:
+      - echo Build started on `date`
+      - npm run build
+      - npx cdk synth
+      - npx cdk deploy --require-approval never
+  post_build:
+    commands:
+      - echo Build completed on `date`
+
+artifacts:
+  files:
+    - path/to/output
+  discard-paths: yes
+
+cache:
+  paths:
+    - '/root/.npm/**/*'

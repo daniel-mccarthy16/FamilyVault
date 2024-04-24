@@ -1,0 +1,26 @@
+*.js
+!jest.config.js
+*.d.ts
+node_modules
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+
+
+.env
+.envrc
+
+
+ignorefolder
+
+
+# Rust specific
+/target/
+**/target/
+# Remove Cargo.lock from library projects, but keep it for executables
+Cargo.lock
+# Artifacts of cargo-c
+**/Cargo.lock
+# Dependency directories (remove if you prefer to keep them)
+**/vendor/

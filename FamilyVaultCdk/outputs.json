@@ -1,0 +1,11 @@
+{
+  "AppStack": {
+    "MyApiGatewayFamilyVaultApiEndpoint00C767F9": "https://tsxktuabhi.execute-api.ap-southeast-2.amazonaws.com/prod/",
+    "CognitoUserPoolUserPoolIDB138E6CD": "ap-southeast-2_bfbtBvjHR",
+    "CognitoUserPoolUserPoolClientIDB781E80A": "gj38uj725ukmd05n6bp6bjlmh",
+    "ApiPostPhotoLambdaLambdaApiPostPhotoExportD53BD4DC": "arn:aws:lambda:ap-southeast-2:891377172146:function:AppStack-ApiPostPhotoLambdaApiPostPhotoC13DE734-wtVltuGA8Vdz",
+    "MyApiGatewayApiUrl3EC16B2F": "https://tsxktuabhi.execute-api.ap-southeast-2.amazonaws.com/prod/",
+    "MyDynamoDbTableDynamoDBTableExportAC07CC33": "FamilyVault",
+    "MyS3BucketBucketNameOutput25438694": "appstack-mys3bucketmyuniquebucketda15ce9c-cdpixlkn5e2s"
+  }
+}

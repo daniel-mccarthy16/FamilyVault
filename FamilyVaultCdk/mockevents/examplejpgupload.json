@@ -1,0 +1,25 @@
+{
+  "version": "0",
+  "id": "cdfba84f-170b-8f71-443f-36612392997f",
+  "detail-type": "Object Created",
+  "source": "aws.s3",
+  "account": "891377172146",
+  "time": "2024-03-25T23:59:38Z",
+  "region": "ap-southeast-2",
+  "resources": ["arn:aws:s3:::appstack-mys3bucketmyuniquebucketda15ce9c-rqeezy7l4r5h"],
+  "detail": {
+    "version": "0",
+    "bucket": {"name": "appstack-mys3bucketmyuniquebucketda15ce9c-rqeezy7l4r5h"},
+    "object": {
+      "key": "photos/example.jpg",
+      "size": 5984449,
+      "etag": "da5686de5db0eb3a343e9c52466dee69",
+      "version-id": "4fULrt2Ba2qQ4d3Ye8D8sbhVAeOiYpv5",
+      "sequencer": "0066020FEA8E4B08AC"
+    },
+    "request-id": "7QV2RP5C90TFSFWK",
+    "requester": "891377172146",
+    "source-ip-address": "121.200.5.64",
+    "reason": "PutObject"
+  }
+}

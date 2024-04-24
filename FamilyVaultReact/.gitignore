@@ -1,0 +1,27 @@
+#TODO - review this...
+# Dependency directories
+node_modules/
+
+# Production build directory
+/dist/
+
+# Environment variables
+.env
+
+# Editor directories and files
+.vscode/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Build outputs
+*.log
+*.cache
+*.tmp
+
+# Lock files
+package-lock.json
+yarn.lock
