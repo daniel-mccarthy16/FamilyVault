@@ -9,7 +9,9 @@ export class FamilyVaultPipeline extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const oauthToken = cdk.SecretValue.secretsManager('cicd-github-token');
+    const oauthToken = cdk.SecretValue.secretsManager('cicd-github-token', {
+        jsonField: 'github-token'
+    });
 
     const pipelineRole = new Role(this, 'FamilyVaultCICDPipelineRole', {
       assumedBy: new ServicePrincipal('codepipeline.amazonaws.com'),
