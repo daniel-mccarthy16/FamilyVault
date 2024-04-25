@@ -68,7 +68,7 @@ export class FamilyVaultPipeline extends cdk.Stack {
         const testBuildProject = new PipelineProject(this, 'TestDeployProject', {
             buildSpec: buildSpec,
             environment: {
-                buildImage: LinuxBuildImage.STANDARD_5_0,
+                buildImage: LinuxBuildImage.STANDARD_7_0
             },
             role: codeBuildRole
         });
