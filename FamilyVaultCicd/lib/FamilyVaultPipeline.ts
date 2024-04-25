@@ -31,6 +31,8 @@ export class FamilyVaultPipeline extends cdk.Stack {
         synth: new ShellStep('Synth', {
             input: source,
             commands: [
+                'pwd',
+                'ls -la',
                 'cd FamilyVaultCicd',
                 'npm ci',
                 'npm run build',
