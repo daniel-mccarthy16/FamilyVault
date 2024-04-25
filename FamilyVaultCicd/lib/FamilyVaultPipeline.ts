@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
+import { PipelineType } from 'aws-cdk-lib/aws-codepipeline';
 import { Role, ServicePrincipal, ManagedPolicy } from 'aws-cdk-lib/aws-iam';
 import { TestDeployStage } from './testDeployStage';
 
@@ -38,6 +39,7 @@ export class FamilyVaultPipeline extends cdk.Stack {
                 'npm run build',
                 'npx cdk synth'
             ],
+            primaryOutputDirectory: 'FamilyVaultCicd/cdk.out'
         }),
     });
 
