@@ -1,7 +1,7 @@
 import { Construct } from 'constructs';
 import { Stack, StackProps, RemovalPolicy, CfnOutput } from 'aws-cdk-lib';
 import { aws_dynamodb as dynamodb } from 'aws-cdk-lib';
-import { DataExports } from '../appConstants';
+import { DataExports } from '../globalconfig';
 
 export class DynamoDbTable extends Construct {
   public readonly table: dynamodb.Table;

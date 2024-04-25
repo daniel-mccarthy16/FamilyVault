@@ -4,7 +4,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3'; // Import the S3 module
 import * as path from 'path';
 import { Construct } from 'constructs';
 import * as cdk from 'aws-cdk-lib';
-import { LambdaFunctionName } from '../../../appConstants';
+import { LambdaFunctionName } from '../../../../globalconfig';
 
 export class ApiPostPhotoLambda extends Construct {
   public readonly lambdaFunction: lambda.Function;
