@@ -28,6 +28,5 @@ export class AppStack extends Stack {
     const cloudfront = new CloudFront(this, 'CloudFrontDist', { api: apiGateway.api, bucket: myS3Bucket.bucket } );
 
     // const config = new FamilyVaultConfig(this, 'FamilyVaultConfig', myS3Bucket.bucket, 
-
   }
 }

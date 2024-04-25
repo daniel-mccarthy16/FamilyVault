@@ -5,7 +5,7 @@ import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as cr from 'aws-cdk-lib/custom-resources';
-import { outputNames } from '../../globalconfig';
+import { outputNames } from 'globalconfig';
 
 export class CognitoUserPool extends Construct {
 

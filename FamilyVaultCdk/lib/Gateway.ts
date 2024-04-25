@@ -1,7 +1,6 @@
 import { Construct } from 'constructs';
 import {  aws_lambda as lambda, aws_apigateway as apigateway, aws_cognito as cognito, CfnOutput } from 'aws-cdk-lib';
-import { outputNames } from '../../globalconfig';
-
+import { outputNames } from 'globalconfig';
 
 export class Gateway extends Construct {
 
