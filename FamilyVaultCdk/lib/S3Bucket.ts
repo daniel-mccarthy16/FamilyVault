@@ -2,7 +2,7 @@ import { Construct } from 'constructs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import { RemovalPolicy, CfnOutput } from 'aws-cdk-lib';
 import * as iam from 'aws-cdk-lib/aws-iam'; // Import IAM module for policy statements
-import { outputNames } from 'globalconfig';
+import { outputNames } from '../globalconfig';
 
 export class S3Bucket extends Construct {
   public readonly bucket: s3.Bucket;
