@@ -21,7 +21,7 @@ export class FamilyVaultPipeline extends cdk.Stack {
     //TODO - tighten up lol
     pipelineRole.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess'));
 
-    const source = CodePipelineSource.gitHub('daniel-mccarthy16/FamilyVault', 'alpha', {
+    const source = CodePipelineSource.gitHub('daniel-mccarthy16/FamilyVault', 'main', {
         authentication: oauthToken,
     });
 
