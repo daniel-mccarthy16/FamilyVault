@@ -10,9 +10,9 @@ export class S3Bucket extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    // S3 Bucket definition
-    this.bucket = new s3.Bucket(this, 'MyUniqueBucket', {
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+    // TODO - split this in to two buckets
+    this.bucket = new s3.Bucket(this, 'FamilyVaultBucket', {
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ACLS,
       versioned: false,
       enforceSSL: true,
       removalPolicy: RemovalPolicy.DESTROY,

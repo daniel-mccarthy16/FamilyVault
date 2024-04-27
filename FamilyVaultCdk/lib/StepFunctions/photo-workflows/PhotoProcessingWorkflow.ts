@@ -17,6 +17,7 @@ import { Choice, Condition, Parallel, Pass } from 'aws-cdk-lib/aws-stepfunctions
 
 
 export class PhotoProcessingWorkflow extends Construct {
+
   public readonly stateMachine: StateMachine;
 
   constructor(scope: Construct, id: string, s3Bucket: s3.IBucket, dynamoDbTable: dynamodb.ITable) {
