@@ -42,7 +42,6 @@ export class PhotoProcessingWorkflow extends Construct {
       resources: ['arn:aws:logs:*:*:*'],
     }));
 
-
     const validationAndTransformationLambda = new RustFunction(this, 'ValidationAndTransformation', {
       manifestPath: path.join(__dirname, './lambdas/validationAndTransformation/Cargo.toml'),
       role: validationLambdaExecutionRole,

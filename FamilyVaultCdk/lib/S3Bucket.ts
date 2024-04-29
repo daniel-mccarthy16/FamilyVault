@@ -11,6 +11,7 @@ export class S3Bucket extends Construct {
     super(scope, id);
 
     // TODO - split this in to two buckets
+    // TODO - prod will have to be versioned ultimately
     this.bucket = new s3.Bucket(this, 'FamilyVaultBucket', {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ACLS,
       versioned: false,
