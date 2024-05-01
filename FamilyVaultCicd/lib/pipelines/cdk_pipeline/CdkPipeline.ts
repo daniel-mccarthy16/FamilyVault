@@ -3,7 +3,6 @@ import { Construct } from 'constructs';
 import { Pipeline, Artifact } from 'aws-cdk-lib/aws-codepipeline';
 import { CodeBuildAction } from 'aws-cdk-lib/aws-codepipeline-actions';
 import { Project, BuildSpec, LinuxBuildImage, Source, BuildEnvironmentVariableType } from 'aws-cdk-lib/aws-codebuild';
-import { Role, ServicePrincipal, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 
 class CdkPipeline extends cdk.Stack {
 
@@ -11,48 +10,46 @@ class CdkPipeline extends cdk.Stack {
     super(scope, id, props);
 
     // Artifacts
+    const dummyArtifact = new Artifact('dummyArtifact');
     const sourceArtifact = new Artifact('SourceArtifact');
-    const buildOutput = new Artifact('BuildOutput');
 
-    const oauthToken = cdk.SecretValue.secretsManager('cicd-github-token', {
-        jsonField: 'github-token'
-    });
-
-    // Define the CodeBuild project for cloning the repository
-    const cloneRepoProject = new Project(this, 'CloneRepository', {
-      projectName: 'CloneRepository',
-      source: Source.gitHub({
-        owner: 'daniel-mccarthy16',
-        repo: 'FamilyVault',
-        webhook: false, // Disable automatic trigger
-      }),
-      environment: {
-        buildImage: LinuxBuildImage.STANDARD_5_0,
-        environmentVariables: {
-          'GITHUB_TOKEN': {
-            value: oauthToken.toString(),
-            type: BuildEnvironmentVariableType.PLAINTEXT
-          }
-        }
+const cloneRepoProject = new Project(this, 'CloneRepository', {
+  projectName: 'CloneRepository',
+  source: Source.gitHub({
+    owner: 'daniel-mccarthy16',
+    repo: 'FamilyVault',
+    webhook: false, // Disable automatic trigger
+  }),
+  environment: {
+    buildImage: LinuxBuildImage.STANDARD_7_0,
+  },
+  buildSpec: BuildSpec.fromObject({
+    version: '0.2',
+    phases: {
+      install: {
+        commands: [
+          'apt-get update',
+          'apt-get install -y jq'
+        ]
       },
-      buildSpec: BuildSpec.fromObject({
-        version: '0.2',
-        phases: {
-          build: {
-            commands: [
-              'echo Cloning the repository...',
-              'git clone https://x-access-token:${GITHUB_TOKEN}@github.com/daniel-mccarthy16/FamilyVault.git .',
-              'echo Preparing artifacts...',
-              'ls -alh' // Optional: List files to verify
-            ],
-          },
-        },
-        artifacts: {
-          'base-directory': 'FamilyVault/FamilyVaultCdk', // Adjust path as necessary
-          'files': ['**/*']
-        },
-      }),
-    });
+      build: {
+        commands: [
+          `echo "Retrieving secret..."`,
+          `GITHUB_TOKEN=$(aws secretsmanager get-secret-value --secret-id cicd-github-token --query SecretString --output text | jq -r '.["github-token"]')`,
+          `echo "Cloning the repository..."`,
+          `git clone https://x-access-token:$GITHUB_TOKEN@github.com/daniel-mccarthy16/FamilyVault.git .`,
+          `echo "Preparing artifacts..."`,
+          `ls -alh`
+        ]
+      }
+    },
+    artifacts: {
+      'base-directory': 'FamilyVault/FamilyVaultCdk', // Adjust path as necessary
+      'files': ['**/*']
+    }
+  })
+});
+
 
     // Define the CodeBuild project for running tests
     const testProject = new Project(this, 'RunTests', {
@@ -107,6 +104,7 @@ class CdkPipeline extends cdk.Stack {
           actionName: 'CloneRepo',
           project: cloneRepoProject,
           outputs: [ sourceArtifact ], // Output artifact used in subsequent stages
+          input: dummyArtifact
         }),
       ],
     });

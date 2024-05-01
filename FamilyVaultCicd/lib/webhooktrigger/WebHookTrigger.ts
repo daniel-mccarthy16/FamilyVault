@@ -4,6 +4,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import { LambdaIntegration } from 'aws-cdk-lib/aws-apigateway';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as path from 'path';
 
 export class WebhookHandler extends Construct {
 
@@ -14,7 +15,7 @@ export class WebhookHandler extends Construct {
     const webhookHandlerLambda = new NodejsFunction(this, 'WebhookHandlerLambda', {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: 'webhookHandler.handler',
-      entry: 'FamilyVaultCicd/lib/webhooktrigger/lambda', // Update the path to your entry file
+      entry: path.join(__dirname, './lambda/webHookHandler.ts'), // Correct the path to the specific .ts file
       environment: {
       }
     });

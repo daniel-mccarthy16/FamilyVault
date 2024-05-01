@@ -11,48 +11,46 @@ class ReactPipeline extends Construct {
     super(scope, id);
 
     // Artifacts
+    const dummyArtifact = new Artifact('dummyArtifact');
     const sourceArtifact = new Artifact('SourceArtifact');
     const buildOutput = new Artifact('BuildOutput');
 
-    const oauthToken = cdk.SecretValue.secretsManager('cicd-github-token', {
-        jsonField: 'github-token'
-    });
 
-    // Define the CodeBuild project for cloning the repository
     const cloneRepoProject = new Project(this, 'CloneRepository', {
       projectName: 'CloneRepository',
       source: Source.gitHub({
         owner: 'daniel-mccarthy16',
         repo: 'FamilyVault',
-        webhook: false,
+        webhook: false, // Disable automatic trigger
       }),
       environment: {
-        buildImage: LinuxBuildImage.STANDARD_5_0,
-        environmentVariables: {
-          'GITHUB_TOKEN': {
-            value: oauthToken.toString(),
-            type: BuildEnvironmentVariableType.PLAINTEXT
-          }
-        }
+        buildImage: LinuxBuildImage.STANDARD_7_0,
       },
       buildSpec: BuildSpec.fromObject({
         version: '0.2',
         phases: {
+          install: {
+            commands: [
+              'apt-get update',
+              'apt-get install -y jq'
+            ]
+          },
           build: {
             commands: [
-              'echo Cloning the repository...',
-              'git clone https://x-access-token:${GITHUB_TOKEN}@github.com/daniel-mccarthy16/FamilyVault.git .',
-              'echo Preparing artifacts from FamilyVaultReact...',
-              'cd FamilyVaultReact',
-              'ls -alh'
-            ],
-          },
+              `echo "Retrieving secret..."`,
+              `GITHUB_TOKEN=$(aws secretsmanager get-secret-value --secret-id cicd-github-token --query SecretString --output text | jq -r '.["github-token"]')`,
+              `echo "Cloning the repository..."`,
+              `git clone https://x-access-token:$GITHUB_TOKEN@github.com/daniel-mccarthy16/FamilyVault.git .`,
+              `echo "Preparing artifacts..."`,
+              `ls -alh`
+            ]
+          }
         },
         artifacts: {
           'base-directory': 'FamilyVault/FamilyVaultReact',
           'files': ['**/*']
-        },
-      }),
+        }
+      })
     });
 
     // Define the CodeBuild project for running tests and linting
@@ -92,7 +90,8 @@ class ReactPipeline extends Construct {
         new CodeBuildAction({
           actionName: 'CloneRepo',
           project: cloneRepoProject,
-          outputs: [ sourceArtifact ] 
+          outputs: [ sourceArtifact ],
+          input: dummyArtifact
         }),
       ],
     });
