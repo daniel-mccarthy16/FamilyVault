@@ -1,4 +1,3 @@
-import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
@@ -8,7 +7,7 @@ import * as path from 'path';
 
 export class WebhookHandler extends Construct {
 
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string) {
     super(scope, id);
 
     // Define the Lambda function to handle GitHub webhooks

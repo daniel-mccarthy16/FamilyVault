@@ -1,18 +1,23 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import {  MasterPipeline } from './pipelines/master_pipeline/MasterPipeline'
-
+import  ReactPipeline  from './pipelines//react_pipeline/ReactPipeline';
+import { WebhookHandler } from './webhooktrigger/WebHookTrigger';
+import CdkPipeline from './pipelines/cdk_pipeline/CdkPipeline';
+import CicdPipeline from './pipelines/cicd_pipeline/CicdPipeline';
 
 export class CicdStack extends cdk.Stack { 
+
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
 
-    //TODO - dont store return values if not needed, will be confusing in the future
     super(scope, id, props);
 
+    //self updating pipeline for deploying cdk code
+    //TODO - maybe in future add tests and make this somewhat safer
 
-    new MasterPipeline(this, 'MasterPipeline');
-
-
+    new CicdPipeline(this, 'CicdPipeline');
+    new CdkPipeline(this, 'CdkPipeline');
+    new ReactPipeline(this, 'ReactPipeline');
+    new WebhookHandler(this, 'WebHookHandler');
   }
 }
 

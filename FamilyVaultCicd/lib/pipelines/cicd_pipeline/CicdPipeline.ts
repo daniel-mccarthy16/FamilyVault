@@ -2,15 +2,13 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Pipeline, Artifact } from 'aws-cdk-lib/aws-codepipeline';
 import { CodeBuildAction } from 'aws-cdk-lib/aws-codepipeline-actions';
-import { Project, BuildSpec, LinuxBuildImage, Source, BuildEnvironmentVariableType } from 'aws-cdk-lib/aws-codebuild';
+import { Project, BuildSpec, LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
 import { GitHubSourceAction, GitHubTrigger } from 'aws-cdk-lib/aws-codepipeline-actions';
 
-class ReactPipeline extends Construct {
-
+class CicdPipeline extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    // Artifacts
     const sourceArtifact = new Artifact('SourceArtifact');
 
     const sourceAction = new GitHubSourceAction({
@@ -24,26 +22,21 @@ class ReactPipeline extends Construct {
       trigger: GitHubTrigger.NONE
     });
 
-
-    // Define the CodeBuild project for running tests and linting
-    const reactJestTestProject = new Project(this, 'RunReactJestTestsCodeBuild', {
-      projectName: 'RunReactJestTestsCodeBuild',
+    // Define the CodeBuild project for deploying updates
+    const cicdDeployProject = new Project(this, 'CicdDeployProject', {
+      projectName: 'CicdDeployProject',
       environment: {
-        buildImage: LinuxBuildImage.STANDARD_7_0,
+        buildImage: LinuxBuildImage.STANDARD_5_0,
       },
       buildSpec: BuildSpec.fromObject({
         version: '0.2',
         phases: {
-          pre_build: {
-            commands: [
-              'npm install',
-            ],
-          },
           build: {
             commands: [
-              'npm run lint',
-              'npm test',
+              'cd FamilyVaultCicd',
+              'npm ci',
               'npm run build',
+              'npx cdk deploy --require-approval never'  // Assuming deployment is intended here
             ],
           },
         },
@@ -51,28 +44,27 @@ class ReactPipeline extends Construct {
     });
 
     // Define the pipeline
-    const pipeline = new Pipeline(this, 'ReactPipeline', {
-      pipelineName: 'ReactPipeline',
+    const pipeline = new Pipeline(this, 'CicdPipeline', {
+      pipelineName: 'CicdPipeline',
     });
 
+    // Add stages to the pipeline
     pipeline.addStage({
       stageName: 'CloneRepo',
-      actions: [
-        sourceAction
-      ],
+      actions: [sourceAction],
     });
 
     pipeline.addStage({
-      stageName: 'RunTests',
+      stageName: 'DeployCicdCdkCode',
       actions: [
         new CodeBuildAction({
-          actionName: 'RunReactJestTests',
-          project: reactJestTestProject,
-          input: sourceArtifact, // Input from previous stage
+          actionName: 'CicdDeploy',
+          project: cicdDeployProject,
+          input: sourceArtifact,
         }),
       ],
     });
   }
 }
 
-export default ReactPipeline;
+export default CicdPipeline;
