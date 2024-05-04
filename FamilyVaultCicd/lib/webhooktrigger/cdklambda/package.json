@@ -2,15 +2,14 @@
   "name": "lambda",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "webHookHandler.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@aws-sdk/client-codepipeline": "^3.569.0",
-    "@aws-sdk/client-secrets-manager": "^3.569.0"
+  "types": "./webHookHandler.d.ts",
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.137"
   }
 }

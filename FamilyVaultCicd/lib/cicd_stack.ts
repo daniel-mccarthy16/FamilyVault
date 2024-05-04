@@ -13,11 +13,17 @@ export class CicdStack extends cdk.Stack {
 
     //self updating pipeline for deploying cdk code
     //TODO - maybe in future add tests and make this somewhat safer
+    //TODO - magic strings...
 
-    new CicdPipeline(this, 'CicdPipeline');
-    new CdkPipeline(this, 'CdkPipeline');
-    new ReactPipeline(this, 'ReactPipeline');
-    new WebhookHandler(this, 'WebHookHandler');
+    const cicdPipeline = new CicdPipeline(this, 'CicdPipeline');
+    const cdkPipeline = new CdkPipeline(this, 'CdkPipeline');
+    const reactPipeline = new ReactPipeline(this, 'ReactPipeline');
+
+    new WebhookHandler(this, 'WebHookHandler', {
+      'cicd': cicdPipeline.pipeline,
+      'cdk': cdkPipeline.pipeline,
+      'react': reactPipeline.pipeline
+    });
   }
 }
 

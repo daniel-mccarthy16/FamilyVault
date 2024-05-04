@@ -2,10 +2,12 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Pipeline, Artifact } from 'aws-cdk-lib/aws-codepipeline';
 import { CodeBuildAction } from 'aws-cdk-lib/aws-codepipeline-actions';
-import { Project, BuildSpec, LinuxBuildImage, Source, BuildEnvironmentVariableType } from 'aws-cdk-lib/aws-codebuild';
+import { Project, BuildSpec, LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
 import { GitHubSourceAction, GitHubTrigger } from 'aws-cdk-lib/aws-codepipeline-actions';
 
 class ReactPipeline extends Construct {
+
+  public readonly pipeline: Pipeline;
 
   constructor(scope: Construct, id: string) {
     super(scope, id);
@@ -72,6 +74,8 @@ class ReactPipeline extends Construct {
         }),
       ],
     });
+
+  this.pipeline = pipeline;
   }
 }
 

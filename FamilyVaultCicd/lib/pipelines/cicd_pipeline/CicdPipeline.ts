@@ -6,6 +6,9 @@ import { Project, BuildSpec, LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
 import { GitHubSourceAction, GitHubTrigger } from 'aws-cdk-lib/aws-codepipeline-actions';
 
 class CicdPipeline extends Construct {
+
+  public readonly pipeline: Pipeline;
+
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
@@ -64,6 +67,8 @@ class CicdPipeline extends Construct {
         }),
       ],
     });
+
+    this.pipeline = pipeline;
   }
 }
 
