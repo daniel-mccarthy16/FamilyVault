@@ -19,11 +19,17 @@ async function getSecret(secretName: string): Promise<string> {
 export const handler = async (event: APIGatewayTokenAuthorizerEvent): Promise<APIGatewayAuthorizerResult> => {
     try {
         console.log("Received event:", JSON.stringify(event, null, 2));
-        const token = event.authorizationToken;
+        let token = event.authorizationToken;
         console.log(`Received authorization token: ${token}`);
         
+        // Remove the "Bearer " prefix if present
+        if (token.toLowerCase().startsWith("bearer ")) {
+            token = token.slice(7).trim();
+        }
+
         const expectedToken = await getSecret("github-webhook-secret");
-        console.log(`Expected authorization token: ${expectedToken}`);
+        console.log(`First 5 characters of received token: ${token.substring(0, 5)}`);
+        console.log(`First 5 characters of expected token: ${expectedToken.substring(0, 5)}`);
         
         if (token === expectedToken) {
             console.log("Authorization successful");
