@@ -26,6 +26,6 @@ Suggestions for Improvement:
 Artifacts: Make sure artifacts (builds, test results) are handled efficiently between stages if needed. Consider using AWS S3 for artifact storage.
 Notifications: Integrate AWS SNS or similar tools to send notifications on failures or required manual approvals.
 Monitoring and Logging: Ensure detailed logging and monitoring are in place, possibly using AWS CloudWatch, to track the pipeline's operation and quickly diagnose issues.
-Security: Review IAM policies and ensure that permissions are strictly controlled, especially for operations that affect production environments.
+Security: Review IAM policies and ensure that permissions are Strictly controlled, especially for operations that affect production environments.
 
 
