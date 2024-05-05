@@ -22,9 +22,9 @@ export const handler = async (event: APIGatewayTokenAuthorizerEvent): Promise<AP
         let token = event.authorizationToken;
         console.log(`Received authorization token: ${token}`);
         
-        // Remove the "Bearer " prefix if present
-        if (token.toLowerCase().startsWith("bearer ")) {
-            token = token.slice(7).trim();
+        // Remove the "token " prefix if present
+        if (token.toLowerCase().startsWith("token ")) {
+            token = token.slice(6).trim();
         }
 
         const expectedToken = await getSecret("github-webhook-secret");
