@@ -28,8 +28,8 @@ export const handler = async (event: APIGatewayTokenAuthorizerEvent): Promise<AP
         }
 
         const expectedToken = await getSecret("github-webhook-secret");
-        console.log(`First 5 characters of received token: ${token.substring(0, 5)}`);
-        console.log(`First 5 characters of expected token: ${expectedToken.substring(0, 5)}`);
+        console.log(`First 5 characters of received token: ${token}`);
+        console.log(`First 5 characters of expected token: ${expectedToken}`);
         
         if (token === expectedToken) {
             console.log("Authorization successful");
@@ -56,30 +56,40 @@ export const handler = async (event: APIGatewayTokenAuthorizerEvent): Promise<AP
     }
 };
 
-const generateAllow = (methodArn: string): APIGatewayAuthorizerResult => ({
-    principalId: 'user',
-    policyDocument: {
-        Version: '2012-10-17',
-        Statement: [
-            {
-                Action: 'execute-api:Invoke',
-                Effect: 'Allow',
-                Resource: methodArn
-            }
-        ]
-    }
-});
+const generateAllow = (methodArn: string): APIGatewayAuthorizerResult => {
+    const policy: APIGatewayAuthorizerResult = {
+        principalId: 'user',
+        policyDocument: {
+            Version: '2012-10-17',
+            Statement: [
+                {
+                    Action: 'execute-api:Invoke',
+                    Effect: 'Allow',
+                    Resource: methodArn
+                }
+            ]
+        }
+    };
 
-const generateDeny = (methodArn: string): APIGatewayAuthorizerResult => ({
-    principalId: 'user',
-    policyDocument: {
-        Version: '2012-10-17',
-        Statement: [
-            {
-                Action: 'execute-api:Invoke',
-                Effect: 'Deny',
-                Resource: methodArn
-            }
-        ]
-    }
-});
+    console.log("Generated allow policy:", JSON.stringify(policy, null, 2));
+    return policy;
+};
+
+const generateDeny = (methodArn: string): APIGatewayAuthorizerResult => {
+    const policy: APIGatewayAuthorizerResult = {
+        principalId: 'user',
+        policyDocument: {
+            Version: '2012-10-17',
+            Statement: [
+                {
+                    Action: 'execute-api:Invoke',
+                    Effect: 'Deny',
+                    Resource: methodArn
+                }
+            ]
+        }
+    };
+
+    console.log("Generated deny policy:", JSON.stringify(policy, null, 2));
+    return policy;
+};
