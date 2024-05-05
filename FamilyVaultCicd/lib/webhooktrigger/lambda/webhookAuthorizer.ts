@@ -4,19 +4,32 @@ import { APIGatewayTokenAuthorizerEvent, APIGatewayAuthorizerResult } from "aws-
 const secretsManagerClient = new SecretsManagerClient();
 
 async function getSecret(secretName: string): Promise<string> {
+    console.log(`Fetching secret: ${secretName}`);
     const command = new GetSecretValueCommand({ SecretId: secretName });
     const response = await secretsManagerClient.send(command);
+    console.log(`Received secret value: ${response.SecretString ? "*******" : null}`);
     return response.SecretString || "";
 }
 
 export const handler = async (event: APIGatewayTokenAuthorizerEvent): Promise<APIGatewayAuthorizerResult> => {
-    const token = event.authorizationToken;
-    const expectedToken = await getSecret("github-webhook-secret");
-
-    if (token === expectedToken) {
-        return generateAllow(event.methodArn);
-    } else {
-        return generateDeny(event.methodArn);
+    try {
+        console.log("Received event:", JSON.stringify(event, null, 2));
+        const token = event.authorizationToken;
+        console.log(`Received authorization token: ${token}`);
+        
+        const expectedToken = await getSecret("github-webhook-secret");
+        console.log(`Expected authorization token: ${expectedToken}`);
+        
+        if (token === expectedToken) {
+            console.log("Authorization successful");
+            return generateAllow(event.methodArn);
+        } else {
+            console.log("Authorization failed");
+            return generateDeny(event.methodArn);
+        }
+    } catch (error) {
+        console.error("Error occurred in the authorizer function:", error);
+        throw error;
     }
 };
 
