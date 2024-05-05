@@ -1,4 +1,5 @@
 import { Construct } from 'constructs';
+import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import { LambdaIntegration } from 'aws-cdk-lib/aws-apigateway';
@@ -31,7 +32,8 @@ export class WebhookHandler extends Construct {
 
     const authorizer = new apigateway.TokenAuthorizer(this, 'WebhookAuthorizer', {
       handler: authorizerLambda,
-      identitySource: 'method.request.header.Authorization'
+      identitySource: 'method.request.header.Authorization', // The header key to check
+      resultsCacheTtl: cdk.Duration.seconds(0) // Disable caching
     });
 
     Object.entries(pipelines).forEach(([pipelineId, pipeline]) => {
