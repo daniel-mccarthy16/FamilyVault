@@ -39,7 +39,7 @@ export class WebhookHandler extends Construct {
     Object.entries(pipelines).forEach(([pipelineId, pipeline]) => {
       const lambdaFunction = new NodejsFunction(this, `${pipelineId}PipelineWebhookHandlerLambda`, {
         runtime: lambda.Runtime.NODEJS_20_X,
-        handler: 'webhookHandler.handler',
+        handler: 'handler',
         entry: path.join(__dirname, `./lambda/${pipelineId}PipelineWebhookHandler.ts`),
         environment: {
           PIPELINE_NAME: pipeline.pipelineName
