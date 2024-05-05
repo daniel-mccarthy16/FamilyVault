@@ -22,7 +22,8 @@ class CicdPipeline extends Construct {
         jsonField: 'github-token'
       }),
       output: sourceArtifact,
-      trigger: GitHubTrigger.NONE
+      trigger: GitHubTrigger.NONE,
+      branch: 'main'
     });
 
     // Define the CodeBuild project for deploying updates

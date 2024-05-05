@@ -23,7 +23,8 @@ class CdkPipeline extends Construct {
         jsonField: 'github-token'
       }),
       output: sourceArtifact,
-      trigger: GitHubTrigger.NONE
+      trigger: GitHubTrigger.NONE,
+      branch: 'main'
     });
 
 
