@@ -38,6 +38,7 @@ class CicdPipeline extends Construct {
           build: {
             commands: [
               'cd FamilyVaultCicd',
+              'ls -ltrah',
               'npm ci',
               'npm run build',
               'npx cdk deploy --require-approval never'  // Assuming deployment is intended here
