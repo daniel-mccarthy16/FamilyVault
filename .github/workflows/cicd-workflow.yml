@@ -1,0 +1,48 @@
+name: Directory-Specific CI/CD
+
+on:
+  push:
+    paths:
+      - 'FamilyVaultReact/**'
+      - 'FamilyVaultCdk/**'
+      - 'FamilyVaultCicd/**'
+
+jobs:
+  react-job:
+    name: React CI/CD
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'main')
+    steps:
+    - name: Call React API Gateway
+      run: |
+        curl -X POST \
+          -H "Content-Type: application/json" \
+          -H "Authorization: token ${{ secrets.AUTHORIZATION_KEY }}" \
+          -d '{"action": "trigger"}' \
+          ${{ secrets.APIGATEWAY_WEBHOOK_URL }}/react
+
+  cdk-job:
+    name: CDK CI/CD
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'main')
+    steps:
+    - name: Call CDK API Gateway
+      run: |
+        curl -X POST \
+          -H "Content-Type: application/json" \
+          -H "Authorization: token ${{ secrets.AUTHORIZATION_KEY }}" \
+          -d '{"action": "trigger"}' \
+          ${{ secrets.APIGATEWAY_WEBHOOK_URL }}/cdk
+
+  cicd-job:
+    name: CICD CI/CD
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'main')
+    steps:
+    - name: Call CICD API Gateway
+      run: |
+        curl -X POST \
+          -H "Content-Type: application/json" \
+          -H "Authorization: token ${{ secrets.AUTHORIZATION_KEY }}" \
+          -d '{"action": "trigger"}' \
+          ${{ secrets.APIGATEWAY_WEBHOOK_URL }}/cicd
