@@ -11,7 +11,7 @@ jobs:
   react-job:
     name: React CI/CD
     runs-on: ubuntu-latest
-    if: contains(github.ref, 'main')
+    if: contains(github.event.commits[*].modified, 'FamilyVaultReact/')
     steps:
     - name: Call React API Gateway
       run: |
@@ -24,7 +24,7 @@ jobs:
   cdk-job:
     name: CDK CI/CD
     runs-on: ubuntu-latest
-    if: contains(github.ref, 'main')
+    if: contains(github.event.commits[*].modified, 'FamilyVaultCdk/')
     steps:
     - name: Call CDK API Gateway
       run: |
@@ -37,7 +37,7 @@ jobs:
   cicd-job:
     name: CICD CI/CD
     runs-on: ubuntu-latest
-    if: contains(github.ref, 'main')
+    if: contains(github.event.commits[*].modified, 'FamilyVaultCicd/')
     steps:
     - name: Call CICD API Gateway
       run: |
