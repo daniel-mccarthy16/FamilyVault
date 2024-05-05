@@ -9,7 +9,7 @@ import * as path from 'path';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 
 //TODO - also need to whitelist github IP range, anything to avoid ending up with a giga bill
-//TODO - rate limit these endpoints, they trigger pipelines after all ... ( 5 a minute? )
+//TODO - rate limit these endpoints, they trigger pipelines after all ... ( 2 a minute? )
 export class WebhookHandler extends Construct {
 
   constructor(scope: Construct, id: string, pipelines: { [key: string]: Pipeline }) {

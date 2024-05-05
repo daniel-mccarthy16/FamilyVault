@@ -26,7 +26,7 @@ class CicdPipeline extends Construct {
       branch: 'main'
     });
 
-    // Define the CodeBuild project for deploying updates
+    //TODO - add custom npm command to bundle these commands maybe
     const cicdDeployProject = new Project(this, 'CicdDeployProject', {
       projectName: 'CicdDeployProject',
       environment: {
@@ -39,9 +39,7 @@ class CicdPipeline extends Construct {
             commands: [
               'cd FamilyVaultCicd',
               'ls -ltrah',
-              'npm ci',
-              'cd lib/webhooktrigger/lambda',
-              'npm ci',
+              'npm run install:all',
               'npx cdk deploy --require-approval never'  // Assuming deployment is intended here
             ],
           },
@@ -49,12 +47,10 @@ class CicdPipeline extends Construct {
       }),
     });
 
-    // Define the pipeline
     const pipeline = new Pipeline(this, 'CicdPipeline', {
       pipelineName: 'CicdPipeline',
     });
 
-    // Add stages to the pipeline
     pipeline.addStage({
       stageName: 'CloneRepo',
       actions: [sourceAction],
