@@ -1,21 +1,21 @@
-name: CICD CI/CD
+name: CDK CI/CD
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'FamilyVaultCicd/**'
+      - 'FamilyVaultCdk/**'
 
 jobs:
-  cicd-job:
-    name: CICD CI/CD
+  cdk-job:
+    name: CDK CI/CD
     runs-on: ubuntu-latest
     steps:
-    - name: Call CICD API Gateway
+    - name: Call CDK API Gateway
       run: |
         curl -X POST \
           -H "Content-Type: application/json" \
           -H "Authorization: token ${{ secrets.AUTHORIZATION_KEY }}" \
           -d '{"action": "trigger"}' \
-          ${{ secrets.APIGATEWAY_WEBHOOK_URL }}/cicd
+          ${{ secrets.APIGATEWAY_WEBHOOK_URL }}/cdk

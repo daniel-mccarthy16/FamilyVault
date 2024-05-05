@@ -1,21 +1,21 @@
-name: CICD CI/CD
+name: React CI/CD
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'FamilyVaultCicd/**'
+      - 'FamilyVaultReact/**'
 
 jobs:
-  cicd-job:
-    name: CICD CI/CD
+  react-job:
+    name: React CI/CD
     runs-on: ubuntu-latest
     steps:
-    - name: Call CICD API Gateway
+    - name: Call React API Gateway
       run: |
         curl -X POST \
           -H "Content-Type: application/json" \
           -H "Authorization: token ${{ secrets.AUTHORIZATION_KEY }}" \
           -d '{"action": "trigger"}' \
-          ${{ secrets.APIGATEWAY_WEBHOOK_URL }}/cicd
+          ${{ secrets.APIGATEWAY_WEBHOOK_URL }}/react
