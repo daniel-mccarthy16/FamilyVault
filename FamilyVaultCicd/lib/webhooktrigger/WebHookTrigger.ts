@@ -31,7 +31,7 @@ export class WebhookHandler extends Construct {
 
     const authorizer = new apigateway.TokenAuthorizer(this, 'WebhookAuthorizer', {
       handler: authorizerLambda,
-      identitySource: 'method.request.header.Authorization' // The header key to check
+      identitySource: 'method.request.header.Authorization'
     });
 
     Object.entries(pipelines).forEach(([pipelineId, pipeline]) => {
