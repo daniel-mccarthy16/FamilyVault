@@ -20,11 +20,8 @@ export class WebhookHandler extends Construct {
 
     const authorizerLambda = new NodejsFunction(this, 'CustomAuthorizerLambda', {
       runtime: lambda.Runtime.NODEJS_20_X,
-      handler: 'authorizer.handler',
+      handler: 'handler',
       entry: path.join(__dirname, './lambda/webhookAuthorizer.ts'),
-      environment: {
-        AUTHORIZATION_KEY: process.env.AUTHORIZATION_KEY || ''
-      }
     });
 
     authorizerLambda.addToRolePolicy(new PolicyStatement({
