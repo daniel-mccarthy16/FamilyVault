@@ -8,6 +8,15 @@ on:
       - 'FamilyVaultCicd/**'
 
 jobs:
+  debug-job:
+    name: React CI/CD
+    runs-on: ubuntu-latest
+    steps:
+    - name: print changed files
+      run: |
+        echo "Modified files: ${GITHUB_EVENT_COMMITS[*].modified}"
+        echo "Added files: ${GITHUB_EVENT_COMMITS[*].added}"
+
   react-job:
     name: React CI/CD
     runs-on: ubuntu-latest
