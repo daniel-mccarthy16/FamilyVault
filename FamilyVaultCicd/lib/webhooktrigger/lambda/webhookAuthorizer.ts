@@ -57,6 +57,11 @@ export const handler = async (event: APIGatewayTokenAuthorizerEvent): Promise<AP
 };
 
 const generateAllow = (methodArn: string): APIGatewayAuthorizerResult => {
+    // Adjusting the ARN to use a wildcard for the stage
+    const arnParts = methodArn.split("/");
+    arnParts[3] = "*"; // Replace the stage with a wildcard
+    const updatedMethodArn = arnParts.join("/");
+
     const policy: APIGatewayAuthorizerResult = {
         principalId: 'user',
         policyDocument: {
@@ -65,7 +70,7 @@ const generateAllow = (methodArn: string): APIGatewayAuthorizerResult => {
                 {
                     Action: 'execute-api:Invoke',
                     Effect: 'Allow',
-                    Resource: methodArn
+                    Resource: updatedMethodArn
                 }
             ]
         }
