@@ -40,7 +40,8 @@ class CicdPipeline extends Construct {
               'cd FamilyVaultCicd',
               'ls -ltrah',
               'npm ci',
-              'npm run build',
+              'cd lib/webhooktrigger/lambda',
+              'npm ci',
               'npx cdk deploy --require-approval never'  // Assuming deployment is intended here
             ],
           },
