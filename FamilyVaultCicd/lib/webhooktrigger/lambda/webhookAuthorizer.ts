@@ -5,10 +5,15 @@ const secretsManagerClient = new SecretsManagerClient();
 
 async function getSecret(secretName: string): Promise<string> {
     console.log(`Fetching secret: ${secretName}`);
-    const command = new GetSecretValueCommand({ SecretId: secretName });
-    const response = await secretsManagerClient.send(command);
-    console.log(`Received secret value: ${response.SecretString ? "*******" : null}`);
-    return response.SecretString || "";
+    try {
+        const command = new GetSecretValueCommand({ SecretId: secretName });
+        const response = await secretsManagerClient.send(command);
+        console.log(`Received secret value: ${response.SecretString ? "*******" : null}`);
+        return response.SecretString || "";
+    } catch (error) {
+        console.error("Error fetching secret:", error);
+        throw error;
+    }
 }
 
 export const handler = async (event: APIGatewayTokenAuthorizerEvent): Promise<APIGatewayAuthorizerResult> => {
@@ -29,7 +34,19 @@ export const handler = async (event: APIGatewayTokenAuthorizerEvent): Promise<AP
         }
     } catch (error) {
         console.error("Error occurred in the authorizer function:", error);
-        throw error;
+        return {
+            principalId: 'user',
+            policyDocument: {
+                Version: '2012-10-17',
+                Statement: [
+                    {
+                        Action: 'execute-api:Invoke',
+                        Effect: 'Deny',
+                        Resource: event.methodArn
+                    }
+                ]
+            }
+        };
     }
 };
 
