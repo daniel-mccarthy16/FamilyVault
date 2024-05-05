@@ -4,6 +4,7 @@ import { Pipeline, Artifact } from 'aws-cdk-lib/aws-codepipeline';
 import { CodeBuildAction } from 'aws-cdk-lib/aws-codepipeline-actions';
 import { Project, BuildSpec, LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
 import { GitHubSourceAction, GitHubTrigger } from 'aws-cdk-lib/aws-codepipeline-actions';
+import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 
 class CicdPipeline extends Construct {
 
@@ -26,7 +27,18 @@ class CicdPipeline extends Construct {
       branch: 'main'
     });
 
-    //TODO - add custom npm command to bundle these commands maybe
+    // Define IAM Role for CodeBuild project
+    const codeBuildRole = new Role(this, 'CodeBuildRole', {
+      assumedBy: new ServicePrincipal('codebuild.amazonaws.com')
+    });
+
+    // Attach policy granting permissions to access SSM parameters
+    codeBuildRole.addToPolicy(new PolicyStatement({
+      actions: ['ssm:GetParameter'],
+      resources: ['arn:aws:ssm:ap-southeast-2:891377335175:parameter/cdk-bootstrap/hnb659fds/version']
+    }));
+
+    // Define the CodeBuild project
     const cicdDeployProject = new Project(this, 'CicdDeployProject', {
       projectName: 'CicdDeployProject',
       environment: {
@@ -45,6 +57,7 @@ class CicdPipeline extends Construct {
           },
         },
       }),
+      role: codeBuildRole // Assign the IAM Role to the CodeBuild project
     });
 
     const pipeline = new Pipeline(this, 'CicdPipeline', {
