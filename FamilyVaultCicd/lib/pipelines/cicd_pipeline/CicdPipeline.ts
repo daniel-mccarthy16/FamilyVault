@@ -30,7 +30,7 @@ class CicdPipeline extends Construct {
     const cicdDeployProject = new Project(this, 'CicdDeployProject', {
       projectName: 'CicdDeployProject',
       environment: {
-        buildImage: LinuxBuildImage.STANDARD_5_0,
+        buildImage: LinuxBuildImage.STANDARD_7_0,
       },
       buildSpec: BuildSpec.fromObject({
         version: '0.2',
