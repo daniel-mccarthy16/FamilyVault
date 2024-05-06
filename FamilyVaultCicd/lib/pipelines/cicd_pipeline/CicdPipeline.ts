@@ -4,7 +4,7 @@ import { Pipeline, Artifact } from 'aws-cdk-lib/aws-codepipeline';
 import { CodeBuildAction } from 'aws-cdk-lib/aws-codepipeline-actions';
 import { Project, BuildSpec, LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
 import { GitHubSourceAction, GitHubTrigger } from 'aws-cdk-lib/aws-codepipeline-actions';
-import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { PolicyStatement, Role, ServicePrincipal, ManagedPolicy } from 'aws-cdk-lib/aws-iam';
 
 class CicdPipeline extends Construct {
 
@@ -28,15 +28,19 @@ class CicdPipeline extends Construct {
     });
 
     // Define IAM Role for CodeBuild project
-    const codeBuildRole = new Role(this, 'CodeBuildRole', {
+    const cdkDeployCodeBuildRole = new Role(this, 'CodeBuildRole', {
       assumedBy: new ServicePrincipal('codebuild.amazonaws.com')
     });
 
+    //TODO - narrow down permissions, it was complaining about not being able to see the cdk bucket in this account but it really was just lacking permissions
     // Attach policy granting permissions to access SSM parameters
-    codeBuildRole.addToPolicy(new PolicyStatement({
-      actions: ['ssm:GetParameter'],
-      resources: ['arn:aws:ssm:ap-southeast-2:891377335175:parameter/cdk-bootstrap/hnb659fds/version']
-    }));
+    // cdkDeployCodeBuildRole.addToPolicy(new PolicyStatement({
+    //   actions: ['ssm:GetParameter'],
+    //   resources: ['arn:aws:ssm:ap-southeast-2:891377335175:parameter/cdk-bootstrap/hnb659fds/version']
+    // }));
+    // Attach AdministratorAccess managed policy
+    cdkDeployCodeBuildRole.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess'));
+
 
     // Define the CodeBuild project
     const cicdDeployProject = new Project(this, 'CicdDeployProject', {
@@ -52,12 +56,12 @@ class CicdPipeline extends Construct {
               'cd FamilyVaultCicd',
               'ls -ltrah',
               'npm run install:all',
-              'npx cdk deploy --require-approval never'  // Assuming deployment is intended here
+              'npx cdk deploy --require-approval never'
             ],
           },
         },
       }),
-      role: codeBuildRole // Assign the IAM Role to the CodeBuild project
+      role: cdkDeployCodeBuildRole // Assign the IAM Role to the CodeBuild project
     });
 
     const pipeline = new Pipeline(this, 'CicdPipeline', {

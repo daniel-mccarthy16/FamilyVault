@@ -12,13 +12,16 @@
     "install:all": "npm ci && npm ci --prefix lib/webhooktrigger/lambda"
   },
   "devDependencies": {
+    "@eslint/js": "^9.2.0",
     "@types/jest": "^29.5.12",
     "@types/node": "20.11.16",
     "aws-cdk": "2.128.0",
+    "eslint": "^8.57.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
-    "typescript": "~5.3.3"
+    "typescript": "~5.3.3",
+    "typescript-eslint": "^7.8.0"
   },
   "dependencies": {
     "aws-cdk-lib": "2.128.0",
