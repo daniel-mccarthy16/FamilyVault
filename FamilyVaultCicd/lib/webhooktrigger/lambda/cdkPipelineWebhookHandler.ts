@@ -1,12 +1,12 @@
 // Import the required AWS SDK v3 packages
 import { CodePipelineClient, StartPipelineExecutionCommand } from '@aws-sdk/client-codepipeline';
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
+import { APIGatewayProxyResult } from 'aws-lambda';
 
 // Create an instance of the CodePipeline client
 const codepipeline = new CodePipelineClient();
 
 // Lambda handler function
-export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
+export const handler = async (): Promise<APIGatewayProxyResult> => {
     // Extract pipeline name from environment variables or event body
     const pipelineName = process.env.PIPELINE_NAME;
 
