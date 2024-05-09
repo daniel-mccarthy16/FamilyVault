@@ -9,7 +9,8 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "install:all": "npm ci && npm ci --prefix lib/webhooktrigger/lambda"
+    "install:all": "npm ci && npm ci --prefix lib/webhooktrigger/lambda",
+    "lint": "eslint 'lib/**/*.ts'"
   },
   "devDependencies": {
     "@eslint/js": "^9.2.0",

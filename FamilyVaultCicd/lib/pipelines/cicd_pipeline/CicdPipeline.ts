@@ -27,6 +27,26 @@ class CicdPipeline extends Construct {
       branch: 'main'
     });
 
+
+    const cicdLintProject = new Project(this, 'CicdLintProject', {
+      projectName: 'CicdDeployProject',
+      environment: {
+        buildImage: LinuxBuildImage.STANDARD_7_0,
+      },
+      buildSpec: BuildSpec.fromObject({
+        version: '0.2',
+        phases: {
+          build: {
+            commands: [
+              'cd FamilyVaultCicd',
+              'npm run install:all',
+              'npm run lint',
+            ],
+          },
+        },
+      }),
+    });
+
     // Define IAM Role for CodeBuild project
     const cdkDeployCodeBuildRole = new Role(this, 'CodeBuildRole', {
       assumedBy: new ServicePrincipal('codebuild.amazonaws.com')
@@ -75,6 +95,17 @@ class CicdPipeline extends Construct {
 
     pipeline.addStage({
       stageName: 'DeployCicdCdkCode',
+      actions: [
+        new CodeBuildAction({
+          actionName: 'Linting',
+          project: cicdLintProject,
+          input: sourceArtifact,
+        }),
+      ],
+    });
+
+    pipeline.addStage({
+      stageName: 'Cicd CDK deploy',
       actions: [
         new CodeBuildAction({
           actionName: 'CicdDeploy',
