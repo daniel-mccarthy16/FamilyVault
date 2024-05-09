@@ -16,6 +16,7 @@ class CicdPipeline extends Construct {
     super(scope, id);
 
     const sourceArtifact = new Artifact("SourceArtifact");
+    const buildArtifact = new Artifact("BuildArtifact");
 
     const sourceAction = new GitHubSourceAction({
       actionName: "GitHub_Source",
@@ -29,8 +30,28 @@ class CicdPipeline extends Construct {
       branch: "main",
     });
 
+
+    const installDependenciesProject = new Project(this, "BuildProject", {
+      projectName: "FamilyVaultInstallDependencies",
+      environment: {
+        buildImage: LinuxBuildImage.STANDARD_7_0,
+      },
+      buildSpec: BuildSpec.fromObject({
+        version: "0.2",
+        phases: {
+          build: {
+            commands: ["echo Installing dependencies...", "cd FamilyVaultCicd", "npm run install:all"]
+          },
+        },
+        artifacts: {
+          "base-directory": "FamilyVaultCicd",
+          files: ["**/*"]
+        }
+      }),
+    });
+
     const cicdLintProject = new Project(this, "CicdLintProject", {
-      projectName: "CicdLintingDeployProject",
+      projectName: "CicdLintingProject",
       environment: {
         buildImage: LinuxBuildImage.STANDARD_7_0,
       },
@@ -39,9 +60,24 @@ class CicdPipeline extends Construct {
         phases: {
           build: {
             commands: [
-              "cd FamilyVaultCicd",
-              "npm run install:all",
               "npm run lint",
+            ],
+          },
+        },
+      }),
+    });
+
+    const cicdPrettierProject = new Project(this, "CicdPrettierProject", {
+      projectName: "CicdPrettierProject",
+      environment: {
+        buildImage: LinuxBuildImage.STANDARD_7_0,
+      },
+      buildSpec: BuildSpec.fromObject({
+        version: "0.2",
+        phases: {
+          build: {
+            commands: [
+              "npm run prettier",
             ],
           },
         },
@@ -75,9 +111,7 @@ class CicdPipeline extends Construct {
         phases: {
           build: {
             commands: [
-              "cd FamilyVaultCicd",
               "ls -ltrah",
-              "npm run install:all",
               "npx cdk deploy --require-approval never",
             ],
           },
@@ -96,12 +130,35 @@ class CicdPipeline extends Construct {
     });
 
     pipeline.addStage({
+      stageName: "install_dependencies",
+      actions:  [
+        new CodeBuildAction({
+              actionName: "Build",
+              project: installDependenciesProject,
+              input: sourceArtifact,
+              outputs: [buildArtifact], // Output the build artifacts for use in other actions
+            })
+      ],
+    });
+
+    pipeline.addStage({
       stageName: "linting",
       actions: [
         new CodeBuildAction({
           actionName: "Linting",
           project: cicdLintProject,
-          input: sourceArtifact,
+          input: buildArtifact,
+        }),
+      ],
+    });
+
+    pipeline.addStage({
+      stageName: "formatter",
+      actions: [
+        new CodeBuildAction({
+          actionName: "Prettier",
+          project: cicdPrettierProject,
+          input: buildArtifact,
         }),
       ],
     });
@@ -112,7 +169,7 @@ class CicdPipeline extends Construct {
         new CodeBuildAction({
           actionName: "CicdDeploy",
           project: cicdDeployProject,
-          input: sourceArtifact,
+          input: buildArtifact,
         }),
       ],
     });
