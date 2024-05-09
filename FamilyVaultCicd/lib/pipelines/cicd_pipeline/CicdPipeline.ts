@@ -29,7 +29,7 @@ class CicdPipeline extends Construct {
 
 
     const cicdLintProject = new Project(this, 'CicdLintProject', {
-      projectName: 'CicdDeployProject',
+      projectName: 'CicdLintingDeployProject',
       environment: {
         buildImage: LinuxBuildImage.STANDARD_7_0,
       },
@@ -89,12 +89,12 @@ class CicdPipeline extends Construct {
     });
 
     pipeline.addStage({
-      stageName: 'CloneRepo',
+      stageName: 'source',
       actions: [sourceAction],
     });
 
     pipeline.addStage({
-      stageName: 'DeployCicdCdkCode',
+      stageName: 'linting',
       actions: [
         new CodeBuildAction({
           actionName: 'Linting',
@@ -105,7 +105,7 @@ class CicdPipeline extends Construct {
     });
 
     pipeline.addStage({
-      stageName: 'Cicd CDK deploy',
+      stageName: 'deploy',
       actions: [
         new CodeBuildAction({
           actionName: 'CicdDeploy',
