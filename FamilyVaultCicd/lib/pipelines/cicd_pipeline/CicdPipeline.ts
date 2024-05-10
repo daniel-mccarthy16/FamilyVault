@@ -16,7 +16,6 @@ class CicdPipeline extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    var weoighwe = 23423423423432;
     const sourceArtifact = new Artifact("SourceArtifact");
     const buildArtifact = new Artifact("BuildArtifact");
 
@@ -62,7 +61,8 @@ class CicdPipeline extends Construct {
           build: {
             commands: [
               "ls -ltrah node_modules/ || true",
-              "node ./node_modules/eslint/bin/eslint.js 'lib/**/*.ts'"
+              "pwd",
+              "npm run lint"
                // "npm run lint",
             ],
           },
