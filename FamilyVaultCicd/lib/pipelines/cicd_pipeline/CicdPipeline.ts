@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { Pipeline, Artifact } from "aws-cdk-lib/aws-codepipeline";
+import { Pipeline, Artifact, PipelineType } from "aws-cdk-lib/aws-codepipeline";
 import { CodeBuildAction } from "aws-cdk-lib/aws-codepipeline-actions";
 import { Project, BuildSpec, LinuxBuildImage } from "aws-cdk-lib/aws-codebuild";
 import {
@@ -9,6 +9,7 @@ import {
 } from "aws-cdk-lib/aws-codepipeline-actions";
 import { Role, ServicePrincipal, ManagedPolicy } from "aws-cdk-lib/aws-iam";
 
+//TODO - the self updating aspect of this pipeline works although the 'last execution status' will show as cancelled. Issue appears to be non functional but requires further investigation and would be nice to have the last execution show as a success
 class CicdPipeline extends Construct {
   public readonly pipeline: Pipeline;
 
@@ -30,7 +31,6 @@ class CicdPipeline extends Construct {
       branch: "main",
     });
 
-
     const installDependenciesProject = new Project(this, "BuildProject", {
       projectName: "FamilyVaultInstallDependencies",
       environment: {
@@ -40,10 +40,10 @@ class CicdPipeline extends Construct {
         version: "0.2",
         phases: {
           build: {
-            commands: ["echo Installing dependencies...", "cd FamilyVaultCicd", "npm run install:all"]
+            commands: ["ls -ltrah || true", "cd FamilyVaultCicd" , "ls -ltrah node_modules/ || true",  "npm run install:all", "ls -ltrah node_modules/ || true" ]
           },
         },
-        artifacts: {
+ artifacts: {
           "base-directory": "FamilyVaultCicd",
           files: ["**/*"]
         }
@@ -60,7 +60,9 @@ class CicdPipeline extends Construct {
         phases: {
           build: {
             commands: [
-              "npm run lint",
+              "ls -ltrah node_modules/ || true",
+              "node ./node_modules/eslint/bin/eslint.js 'lib/**/*.ts'"
+               // "npm run lint",
             ],
           },
         },
@@ -77,6 +79,7 @@ class CicdPipeline extends Construct {
         phases: {
           build: {
             commands: [
+              "ls -ltrah node_modules/ || true",
               "npm run prettier",
             ],
           },
@@ -111,7 +114,7 @@ class CicdPipeline extends Construct {
         phases: {
           build: {
             commands: [
-              "ls -ltrah",
+              "ls -ltrah || true",
               "npx cdk deploy --require-approval never",
             ],
           },
@@ -122,6 +125,7 @@ class CicdPipeline extends Construct {
 
     const pipeline = new Pipeline(this, "CicdPipeline", {
       pipelineName: "CicdPipeline",
+      pipelineType: PipelineType.V2,
     });
 
     pipeline.addStage({
@@ -136,7 +140,7 @@ class CicdPipeline extends Construct {
               actionName: "Build",
               project: installDependenciesProject,
               input: sourceArtifact,
-              outputs: [buildArtifact], // Output the build artifacts for use in other actions
+              outputs: [buildArtifact],
             })
       ],
     });
