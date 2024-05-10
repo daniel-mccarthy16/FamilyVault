@@ -12,7 +12,10 @@
     "install:all": "npm ci && npm ci --prefix lib/webhooktrigger/lambda",
     "lint": "eslint 'lib/**/*.ts'",
     "prettier": "prettier 'lib/**/*.ts'",
-    "prettier-write": "prettier --write 'lib/**/*.ts'"
+    "prettier-write": "prettier --write 'lib/**/*.ts'",
+    "prettier-cicd": "prettier --config ./path/to/your/.prettierrc 'lib/**/*.ts'",
+    "lint-cicd": "eslint 'lib/**/*.ts' --config ./eslint.config.mjs"
+
   },
   "devDependencies": {
     "@eslint/js": "^9.2.0",

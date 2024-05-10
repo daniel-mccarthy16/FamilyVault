@@ -18,6 +18,7 @@ class CicdPipeline extends Construct {
     super(scope, id);
 
     const sourceArtifact = new Artifact("SourceArtifact");
+    const projectArtifact = new Artifact("ProjectArtifact");
     const buildArtifact = new Artifact("BuildArtifact");
 
     const sourceAction = new GitHubSourceAction({
@@ -31,6 +32,29 @@ class CicdPipeline extends Construct {
       trigger: GitHubTrigger.NONE,
       branch: "main",
     });
+    
+    const prepareArtifactProject = new Project(this, "PrepareArtifactProject", {
+      projectName: "PrepareArtifact",
+      environment: {
+        buildImage: LinuxBuildImage.STANDARD_7_0,
+      },
+      buildSpec: BuildSpec.fromObject({
+        version: "0.2",
+        phases: {
+          build: {
+            commands: [
+              "ls -ltrah || true",
+              "cd FamilyVaultCicd",
+              "ls -ltrah || true", // Just to verify contents
+            ],
+          },
+        },
+        artifacts: {
+          "base-directory": "FamilyVaultCicd",
+          files: ["**/*"],
+        },
+      }),
+    });
 
     const installDependenciesProject = new Project(this, "BuildProject", {
       projectName: "FamilyVaultInstallDependencies",
@@ -43,7 +67,6 @@ class CicdPipeline extends Construct {
           build: {
             commands: [
               "ls -ltrah || true",
-              "cd FamilyVaultCicd",
               "ls -ltrah node_modules/ || true",
     "npm config list",
                 "npm run install:all",
@@ -52,7 +75,7 @@ class CicdPipeline extends Construct {
           },
         },
         artifacts: {
-          "base-directory": "FamilyVaultCicd",
+          "base-directory": ".",
           files: ["**/*"],
         },
       }),
@@ -72,7 +95,7 @@ class CicdPipeline extends Construct {
               "pwd",
     "npm config list",
               "ls -ltrah || true",
-              "npm run lint",
+              "npm run lint-cicd",
               // "npm run lint",
             ],
           },
@@ -148,12 +171,24 @@ class CicdPipeline extends Construct {
     });
 
     pipeline.addStage({
+      stageName: "prepare_project",
+      actions: [
+        new CodeBuildAction({
+          actionName: "Build",
+          project: prepareArtifactProject,
+          input: sourceArtifact,
+          outputs: [projectArtifact],
+        }),
+      ],
+    });
+
+    pipeline.addStage({
       stageName: "install_dependencies",
       actions: [
         new CodeBuildAction({
           actionName: "Build",
           project: installDependenciesProject,
-          input: sourceArtifact,
+          input: projectArtifact,
           outputs: [buildArtifact],
         }),
       ],
