@@ -45,7 +45,8 @@ class CicdPipeline extends Construct {
               "ls -ltrah || true",
               "cd FamilyVaultCicd",
               "ls -ltrah node_modules/ || true",
-              "npm run install:all",
+    "npm config list",
+                "npm run install:all",
               "ls -ltrah node_modules/ || true",
             ],
           },
@@ -69,6 +70,7 @@ class CicdPipeline extends Construct {
             commands: [
               "ls -ltrah node_modules/ || true",
               "pwd",
+    "npm config list",
               "ls -ltrah || true",
               "npm run lint",
               // "npm run lint",
@@ -90,6 +92,7 @@ class CicdPipeline extends Construct {
             commands: [
               "ls -ltrah node_modules/ || true",
               "pwd",
+    "npm config list",
               "ls -ltrah || true",
               "npm run prettier",
             ],
