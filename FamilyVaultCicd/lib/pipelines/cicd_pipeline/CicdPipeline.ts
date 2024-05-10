@@ -41,13 +41,19 @@ class CicdPipeline extends Construct {
         version: "0.2",
         phases: {
           build: {
-            commands: ["ls -ltrah || true", "cd FamilyVaultCicd" , "ls -ltrah node_modules/ || true",  "npm run install:all", "ls -ltrah node_modules/ || true" ]
+            commands: [
+              "ls -ltrah || true",
+              "cd FamilyVaultCicd",
+              "ls -ltrah node_modules/ || true",
+              "npm run install:all",
+              "ls -ltrah node_modules/ || true",
+            ],
           },
         },
- artifacts: {
+        artifacts: {
           "base-directory": "FamilyVaultCicd",
-          files: ["**/*"]
-        }
+          files: ["**/*"],
+        },
       }),
     });
 
@@ -63,8 +69,9 @@ class CicdPipeline extends Construct {
             commands: [
               "ls -ltrah node_modules/ || true",
               "pwd",
-              "npm run lint"
-               // "npm run lint",
+              "ls -ltrah || true",
+              "npm run lint",
+              // "npm run lint",
             ],
           },
         },
@@ -83,6 +90,7 @@ class CicdPipeline extends Construct {
             commands: [
               "ls -ltrah node_modules/ || true",
               "pwd",
+              "ls -ltrah || true",
               "npm run prettier",
             ],
           },
@@ -138,13 +146,13 @@ class CicdPipeline extends Construct {
 
     pipeline.addStage({
       stageName: "install_dependencies",
-      actions:  [
+      actions: [
         new CodeBuildAction({
-              actionName: "Build",
-              project: installDependenciesProject,
-              input: sourceArtifact,
-              outputs: [buildArtifact],
-            })
+          actionName: "Build",
+          project: installDependenciesProject,
+          input: sourceArtifact,
+          outputs: [buildArtifact],
+        }),
       ],
     });
 
