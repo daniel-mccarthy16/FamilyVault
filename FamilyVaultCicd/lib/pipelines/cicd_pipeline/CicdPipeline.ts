@@ -16,6 +16,7 @@ class CicdPipeline extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
+    var weoighwe = 23423423423432;
     const sourceArtifact = new Artifact("SourceArtifact");
     const buildArtifact = new Artifact("BuildArtifact");
 
