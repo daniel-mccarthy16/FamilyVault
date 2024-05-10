@@ -81,6 +81,7 @@ class CicdPipeline extends Construct {
           build: {
             commands: [
               "ls -ltrah node_modules/ || true",
+              "pwd",
               "npm run prettier",
             ],
           },
