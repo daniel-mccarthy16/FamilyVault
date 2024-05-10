@@ -10,7 +10,7 @@
     "test": "jest",
     "cdk": "cdk",
     "install:all": "npm ci && npm ci --prefix lib/webhooktrigger/lambda",
-    "lint": "node ./node_modules/eslint/bin/eslint.js 'lib/**/*.ts'",
+    "lint": "node ./node_modules/.bin/eslint 'lib/**/*.ts'",
     "prettier": "node ./node_modules/.bin/prettier 'lib/**/*.ts'"
   },
   "devDependencies": {

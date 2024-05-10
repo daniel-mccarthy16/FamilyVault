@@ -10,6 +10,7 @@ import {
 import { Role, ServicePrincipal, ManagedPolicy } from "aws-cdk-lib/aws-iam";
 
 //TODO - the self updating aspect of this pipeline works although the 'last execution status' will show as cancelled. Issue appears to be non functional but requires further investigation and would be nice to have the last execution show as a success
+//TODO - npm run lint and npm run prettier commands need looking at, currently have to specific the exact binary (cant simply add a 'eslint xxxxx' command for some reason
 class CicdPipeline extends Construct {
   public readonly pipeline: Pipeline;
 
