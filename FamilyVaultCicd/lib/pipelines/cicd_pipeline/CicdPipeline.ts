@@ -9,10 +9,6 @@ import {
 } from "aws-cdk-lib/aws-codepipeline-actions";
 import { Role, ServicePrincipal, ManagedPolicy } from "aws-cdk-lib/aws-iam";
 
-// TODO: Consider creating a custom Docker image containing all required development and security testing tools (like Snyk, ESLint, Prettier). This approach would ensure environment consistency and potentially speed up the pipeline. Monitor the maintenance overhead and performance impact of using a comprehensive Docker image.
-//TODO - the self updating aspect of this pipeline works although the 'last execution status' will show as cancelled. Issue appears to be non functional but requires further investigation and would be nice to have the last execution show as a success
-//TODO - npm run commands need looking at, currently have to invoke executables through node otherwise they can't resolve modules
-
 class CicdPipeline extends Construct {
   public readonly pipeline: Pipeline;
 
@@ -20,7 +16,6 @@ class CicdPipeline extends Construct {
     super(scope, id);
 
     const sourceArtifact = new Artifact("SourceArtifact");
-    const buildArtifact = new Artifact("BuildArtifact");
 
     const sourceAction = new GitHubSourceAction({
       actionName: "GitHub_Source",
@@ -41,6 +36,9 @@ class CicdPipeline extends Construct {
       },
       buildSpec: BuildSpec.fromObject({
         version: "0.2",
+        cache: {
+          paths: ['node_modules/**/*']
+        },
         phases: {
           build: {
             commands: [
@@ -53,10 +51,6 @@ class CicdPipeline extends Construct {
             ],
           },
         },
-        artifacts: {
-          "base-directory": "FamilyVaultCicd",
-          files: ["**/*"],
-        },
       }),
     });
 
@@ -67,15 +61,18 @@ class CicdPipeline extends Construct {
       },
       buildSpec: BuildSpec.fromObject({
         version: "0.2",
+        cache: {
+          paths: ['node_modules/**/*']
+        },
         phases: {
           build: {
             commands: [
               "ls -ltrah node_modules/ || true",
+              "cd FamilyVaultCicd",
               "pwd",
               "npm config list",
               "ls -ltrah || true",
-              "npm run lint-cicd",
-              // "npm run lint",
+              "npm run lint",
             ],
           },
         },
@@ -89,37 +86,24 @@ class CicdPipeline extends Construct {
       },
       buildSpec: BuildSpec.fromObject({
         version: "0.2",
+        cache: {
+          paths: ['node_modules/**/*']
+        },
         phases: {
           build: {
             commands: [
               "ls -ltrah node_modules/ || true",
+              "cd FamilyVaultCicd",
               "pwd",
               "npm config list",
               "ls -ltrah || true",
-              "npm run prettier-cicd",
+              "npm run prettier",
             ],
           },
         },
       }),
     });
 
-    // Define IAM Role for CodeBuild project
-    const cdkDeployCodeBuildRole = new Role(this, "CodeBuildRole", {
-      assumedBy: new ServicePrincipal("codebuild.amazonaws.com"),
-    });
-
-    //TODO - narrow down permissions, it was complaining about not being able to see the cdk bucket in this account but it really was just lacking permissions
-    // Attach policy granting permissions to access SSM parameters
-    // cdkDeployCodeBuildRole.addToPolicy(new PolicyStatement({
-    //   actions: ['ssm:GetParameter'],
-    //   resources: ['arn:aws:ssm:ap-southeast-2:891377335175:parameter/cdk-bootstrap/hnb659fds/version']
-    // }));
-    // Attach AdministratorAccess managed policy
-    cdkDeployCodeBuildRole.addManagedPolicy(
-      ManagedPolicy.fromAwsManagedPolicyName("AdministratorAccess"),
-    );
-
-    // Define the CodeBuild project
     const cicdDeployProject = new Project(this, "CicdDeployProject", {
       projectName: "CicdDeployProject",
       environment: {
@@ -127,13 +111,21 @@ class CicdPipeline extends Construct {
       },
       buildSpec: BuildSpec.fromObject({
         version: "0.2",
+        cache: {
+          paths: ['node_modules/**/*']
+        },
         phases: {
           build: {
-            commands: ["ls -ltrah || true", "npm run deploy-cicd"],
+            commands: ["ls -ltrah || true",  "cd FamilyVaultCicd",  "npx cdk deploy --require-approval never"],
           },
         },
       }),
-      role: cdkDeployCodeBuildRole, // Assign the IAM Role to the CodeBuild project
+      role: new Role(this, "CodeBuildRole", {
+        assumedBy: new ServicePrincipal("codebuild.amazonaws.com"),
+        managedPolicies: [
+          ManagedPolicy.fromAwsManagedPolicyName("AdministratorAccess"),
+        ],
+      }),
     });
 
     const pipeline = new Pipeline(this, "CicdPipeline", {
@@ -153,7 +145,6 @@ class CicdPipeline extends Construct {
           actionName: "Build",
           project: installDependenciesProject,
           input: sourceArtifact,
-          outputs: [buildArtifact],
         }),
       ],
     });
@@ -164,7 +155,7 @@ class CicdPipeline extends Construct {
         new CodeBuildAction({
           actionName: "Linting",
           project: cicdLintProject,
-          input: buildArtifact,
+          input: sourceArtifact,
         }),
       ],
     });
@@ -175,7 +166,7 @@ class CicdPipeline extends Construct {
         new CodeBuildAction({
           actionName: "Prettier",
           project: cicdPrettierProject,
-          input: buildArtifact,
+          input: sourceArtifact,
         }),
       ],
     });
@@ -186,7 +177,7 @@ class CicdPipeline extends Construct {
         new CodeBuildAction({
           actionName: "CicdDeploy",
           project: cicdDeployProject,
-          input: buildArtifact,
+          input: sourceArtifact,
         }),
       ],
     });
