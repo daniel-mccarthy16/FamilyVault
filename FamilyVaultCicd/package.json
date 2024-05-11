@@ -14,8 +14,7 @@
     "prettier": "prettier 'lib/**/*.ts'",
     "prettier-write": "prettier --write 'lib/**/*.ts'",
     "prettier-cicd": "prettier --config ./path/to/your/.prettierrc 'lib/**/*.ts'",
-    "lint-cicd": "eslint 'lib/**/*.ts' --config ./eslint.config.mjs"
-
+    "lint-cicd": "node ./node_modules/eslint/bin/eslint.js 'lib/**/*.ts'"
   },
   "devDependencies": {
     "@eslint/js": "^9.2.0",
