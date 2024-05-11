@@ -9,8 +9,10 @@ import {
 } from "aws-cdk-lib/aws-codepipeline-actions";
 import { Role, ServicePrincipal, ManagedPolicy } from "aws-cdk-lib/aws-iam";
 
+// TODO: Consider creating a custom Docker image containing all required development and security testing tools (like Snyk, ESLint, Prettier). This approach would ensure environment consistency and potentially speed up the pipeline. Monitor the maintenance overhead and performance impact of using a comprehensive Docker image.
 //TODO - the self updating aspect of this pipeline works although the 'last execution status' will show as cancelled. Issue appears to be non functional but requires further investigation and would be nice to have the last execution show as a success
-//TODO - npm run lint and npm run prettier commands need looking at, currently have to specific the exact binary (cant simply add a 'eslint xxxxx' command for some reason
+//TODO - npm run commands need looking at, currently have to invoke executables through node otherwise they can't resolve modules
+
 class CicdPipeline extends Construct {
   public readonly pipeline: Pipeline;
 
@@ -18,7 +20,6 @@ class CicdPipeline extends Construct {
     super(scope, id);
 
     const sourceArtifact = new Artifact("SourceArtifact");
-    const projectArtifact = new Artifact("ProjectArtifact");
     const buildArtifact = new Artifact("BuildArtifact");
 
     const sourceAction = new GitHubSourceAction({
@@ -33,29 +34,6 @@ class CicdPipeline extends Construct {
       branch: "main",
     });
 
-    const prepareArtifactProject = new Project(this, "PrepareArtifactProject", {
-      projectName: "PrepareArtifact",
-      environment: {
-        buildImage: LinuxBuildImage.STANDARD_7_0,
-      },
-      buildSpec: BuildSpec.fromObject({
-        version: "0.2",
-        phases: {
-          build: {
-            commands: [
-              "ls -ltrah || true",
-              "cd FamilyVaultCicd",
-              "ls -ltrah || true", // Just to verify contents
-            ],
-          },
-        },
-        artifacts: {
-          "base-directory": "FamilyVaultCicd",
-          files: ["**/*"],
-        },
-      }),
-    });
-
     const installDependenciesProject = new Project(this, "BuildProject", {
       projectName: "FamilyVaultInstallDependencies",
       environment: {
@@ -67,6 +45,7 @@ class CicdPipeline extends Construct {
           build: {
             commands: [
               "ls -ltrah || true",
+              "cd FamilyVaultCicd",
               "ls -ltrah node_modules/ || true",
               "npm config list",
               "npm run install:all",
@@ -75,7 +54,7 @@ class CicdPipeline extends Construct {
           },
         },
         artifacts: {
-          "base-directory": ".",
+          "base-directory": "FamilyVaultCicd",
           files: ["**/*"],
         },
       }),
@@ -117,7 +96,7 @@ class CicdPipeline extends Construct {
               "pwd",
               "npm config list",
               "ls -ltrah || true",
-              "npm run prettier",
+              "npm run prettier-cicd",
             ],
           },
         },
@@ -150,10 +129,7 @@ class CicdPipeline extends Construct {
         version: "0.2",
         phases: {
           build: {
-            commands: [
-              "ls -ltrah || true",
-              "npx cdk deploy --require-approval never",
-            ],
+            commands: ["ls -ltrah || true", "npm run deploy-cicd"],
           },
         },
       }),
@@ -171,24 +147,12 @@ class CicdPipeline extends Construct {
     });
 
     pipeline.addStage({
-      stageName: "prepare_project",
-      actions: [
-        new CodeBuildAction({
-          actionName: "Build",
-          project: prepareArtifactProject,
-          input: sourceArtifact,
-          outputs: [projectArtifact],
-        }),
-      ],
-    });
-
-    pipeline.addStage({
       stageName: "install_dependencies",
       actions: [
         new CodeBuildAction({
           actionName: "Build",
           project: installDependenciesProject,
-          input: projectArtifact,
+          input: sourceArtifact,
           outputs: [buildArtifact],
         }),
       ],

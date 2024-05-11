@@ -14,7 +14,8 @@
     "prettier": "prettier 'lib/**/*.ts'",
     "prettier-write": "prettier --write 'lib/**/*.ts'",
     "prettier-cicd": "node ./node_modules/prettier/bin/prettier.cjs 'lib/**/*.ts'",
-    "lint-cicd": "node ./node_modules/eslint/bin/eslint.js 'lib/**/*.ts'"
+    "lint-cicd": "node ./node_modules/eslint/bin/eslint.js 'lib/**/*.ts'",
+    "deploy-cicd": "node ./node_modules/aws-cdk/bin/cdk deploy --require-approval never"
   },
   "devDependencies": {
     "@eslint/js": "^9.2.0",
