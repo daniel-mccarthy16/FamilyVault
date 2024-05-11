@@ -32,7 +32,7 @@ class CicdPipeline extends Construct {
       trigger: GitHubTrigger.NONE,
       branch: "main",
     });
-    
+
     const prepareArtifactProject = new Project(this, "PrepareArtifactProject", {
       projectName: "PrepareArtifact",
       environment: {
@@ -68,8 +68,8 @@ class CicdPipeline extends Construct {
             commands: [
               "ls -ltrah || true",
               "ls -ltrah node_modules/ || true",
-    "npm config list",
-                "npm run install:all",
+              "npm config list",
+              "npm run install:all",
               "ls -ltrah node_modules/ || true",
             ],
           },
@@ -93,7 +93,7 @@ class CicdPipeline extends Construct {
             commands: [
               "ls -ltrah node_modules/ || true",
               "pwd",
-    "npm config list",
+              "npm config list",
               "ls -ltrah || true",
               "npm run lint-cicd",
               // "npm run lint",
@@ -115,7 +115,7 @@ class CicdPipeline extends Construct {
             commands: [
               "ls -ltrah node_modules/ || true",
               "pwd",
-    "npm config list",
+              "npm config list",
               "ls -ltrah || true",
               "npm run prettier",
             ],
