@@ -13,6 +13,7 @@ import { Bucket } from "aws-cdk-lib/aws-s3";
 
 //TODO - investing if npm cache caching is working as intended
 //TODO - having real issues when install dependencies into an artifact and importing it in the olther stages, needs to be investigated. potentially has to do with npm installing before passing only the cicd subfolder through which is borking npm paths somewhere?
+//TODO - parallelize 
 
 class CicdPipeline extends Construct {
   public readonly pipeline: Pipeline;
@@ -114,6 +115,29 @@ class CicdPipeline extends Construct {
       }),
     });
 
+    const cicdSynthTestsProject = new Project(this, "CicdSynthTestsProject", {
+      projectName: "CicdSynthTestsProject",
+      cache: Cache.bucket(cachingBucket),
+      environment: {
+        buildImage: LinuxBuildImage.STANDARD_7_0,
+      },
+      buildSpec: BuildSpec.fromObject({
+        version: "0.2",
+        cache: {
+          paths: ["/root/.npm/**/*"],
+        },
+        phases: {
+          build: {
+            commands: [
+              "ls -ltrah || true",
+              "cd FamilyVaultCicd",
+              "npm run test",
+            ],
+          },
+        },
+      }),
+    });
+
     const cicdDeployProject = new Project(this, "CicdDeployProject", {
       projectName: "CicdDeployProject",
       cache: Cache.bucket(cachingBucket),
@@ -166,6 +190,18 @@ class CicdPipeline extends Construct {
     });
 
     pipeline.addStage({
+      stageName: "formatter",
+      actions: [
+        new CodeBuildAction({
+          actionName: "Prettier",
+          project: cicdPrettierProject,
+          input: sourceArtifact,
+        }),
+      ],
+    });
+    
+    //TODO - format before linting, but lets just run these in parallel
+    pipeline.addStage({
       stageName: "linting",
       actions: [
         new CodeBuildAction({
@@ -177,15 +213,16 @@ class CicdPipeline extends Construct {
     });
 
     pipeline.addStage({
-      stageName: "formatter",
+      stageName: "synth_testing",
       actions: [
         new CodeBuildAction({
-          actionName: "Prettier",
-          project: cicdPrettierProject,
+          actionName: "SynthTests",
+          project: cicdSynthTestsProject,
           input: sourceArtifact,
         }),
       ],
     });
+
 
     pipeline.addStage({
       stageName: "deploy",
