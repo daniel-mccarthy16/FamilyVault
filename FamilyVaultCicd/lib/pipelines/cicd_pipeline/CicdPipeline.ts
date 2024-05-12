@@ -131,6 +131,7 @@ class CicdPipeline extends Construct {
             commands: [
               "ls -ltrah || true",
               "cd FamilyVaultCicd",
+              "npm run install:all",
               "npm run test",
             ],
           },
