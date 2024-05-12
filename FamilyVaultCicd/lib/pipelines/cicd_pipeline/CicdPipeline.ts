@@ -13,7 +13,7 @@ import { Bucket } from "aws-cdk-lib/aws-s3";
 
 //TODO - investing if npm cache caching is working as intended
 //TODO - having real issues when install dependencies into an artifact and importing it in the olther stages, needs to be investigated. potentially has to do with npm installing before passing only the cicd subfolder through which is borking npm paths somewhere?
-//TODO - parallelize 
+//TODO - parallelize
 
 class CicdPipeline extends Construct {
   public readonly pipeline: Pipeline;
@@ -199,7 +199,7 @@ class CicdPipeline extends Construct {
         }),
       ],
     });
-    
+
     //TODO - format before linting, but lets just run these in parallel
     pipeline.addStage({
       stageName: "linting",
@@ -222,7 +222,6 @@ class CicdPipeline extends Construct {
         }),
       ],
     });
-
 
     pipeline.addStage({
       stageName: "deploy",
