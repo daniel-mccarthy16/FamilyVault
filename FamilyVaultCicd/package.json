@@ -13,7 +13,7 @@
     "lint": "eslint 'lib/**/*.ts'",
     "prettier": "prettier 'lib/**/*.ts'",
     "prettier-write": "prettier --write 'lib/**/*.ts'",
-    "prettier-cicd": "node --trace-deprecation ./node_modules/prettier/bin/prettier.cjs 'lib/**/*.ts'",
+    "prettier-check": "prettier --check 'lib/**/*.ts'",
     "lint-cicd": "node --trace-deprecation  ./node_modules/eslint/bin/eslint.js 'lib/**/*.ts'",
     "deploy-cicd": "node --trace-deprecation ./node_modules/aws-cdk/bin/cdk deploy --require-approval never"
   },

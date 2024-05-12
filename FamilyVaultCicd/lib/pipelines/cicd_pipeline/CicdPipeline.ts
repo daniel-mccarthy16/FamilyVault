@@ -8,11 +8,13 @@ import {
   GitHubTrigger,
 } from "aws-cdk-lib/aws-codepipeline-actions";
 import { Role, ServicePrincipal, ManagedPolicy } from "aws-cdk-lib/aws-iam";
+import { Cache } from "aws-cdk-lib/aws-codebuild";
+import { Bucket } from "aws-cdk-lib/aws-s3";
 
 class CicdPipeline extends Construct {
   public readonly pipeline: Pipeline;
 
-  constructor(scope: Construct, id: string) {
+  constructor(scope: Construct, id: string, cachingBucket: Bucket) {
     super(scope, id);
 
     const sourceArtifact = new Artifact("SourceArtifact");
@@ -34,10 +36,11 @@ class CicdPipeline extends Construct {
       environment: {
         buildImage: LinuxBuildImage.STANDARD_7_0,
       },
+      cache: Cache.bucket(cachingBucket),
       buildSpec: BuildSpec.fromObject({
         version: "0.2",
         cache: {
-          paths: ['node_modules/**/*']
+          paths: ["/root/.npm/**/*"],
         },
         phases: {
           build: {
@@ -59,16 +62,18 @@ class CicdPipeline extends Construct {
       environment: {
         buildImage: LinuxBuildImage.STANDARD_7_0,
       },
+      cache: Cache.bucket(cachingBucket),
       buildSpec: BuildSpec.fromObject({
         version: "0.2",
         cache: {
-          paths: ['node_modules/**/*']
+          paths: ["/root/.npm/**/*"],
         },
         phases: {
           build: {
             commands: [
               "ls -ltrah node_modules/ || true",
               "cd FamilyVaultCicd",
+              "npm run install:all",
               "pwd",
               "npm config list",
               "ls -ltrah || true",
@@ -84,20 +89,22 @@ class CicdPipeline extends Construct {
       environment: {
         buildImage: LinuxBuildImage.STANDARD_7_0,
       },
+      cache: Cache.bucket(cachingBucket),
       buildSpec: BuildSpec.fromObject({
         version: "0.2",
         cache: {
-          paths: ['node_modules/**/*']
+          paths: ["/root/.npm/**/*"],
         },
         phases: {
           build: {
             commands: [
               "ls -ltrah node_modules/ || true",
               "cd FamilyVaultCicd",
+              "npm run install:all",
               "pwd",
               "npm config list",
               "ls -ltrah || true",
-              "npm run prettier",
+              "npm run prettier-check",
             ],
           },
         },
@@ -106,17 +113,22 @@ class CicdPipeline extends Construct {
 
     const cicdDeployProject = new Project(this, "CicdDeployProject", {
       projectName: "CicdDeployProject",
+      cache: Cache.bucket(cachingBucket),
       environment: {
         buildImage: LinuxBuildImage.STANDARD_7_0,
       },
       buildSpec: BuildSpec.fromObject({
         version: "0.2",
         cache: {
-          paths: ['node_modules/**/*']
+          paths: ["/root/.npm/**/*"],
         },
         phases: {
           build: {
-            commands: ["ls -ltrah || true",  "cd FamilyVaultCicd",  "npx cdk deploy --require-approval never"],
+            commands: [
+              "ls -ltrah || true",
+              "cd FamilyVaultCicd",
+              "npx cdk deploy --require-approval never",
+            ],
           },
         },
       }),
