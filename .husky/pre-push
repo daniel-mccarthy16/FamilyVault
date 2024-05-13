@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Path to your Dockerfile
+DOCKERFILE_PATH="./dockerfiles/trufflehog/Dockerfile"
+# Docker image name
+IMAGE_NAME="trufflehog-scanner"
+
+# Function to build Docker image
+build_docker_image() {
+    echo "Building Docker image..."
+    docker build -t $IMAGE_NAME -f $DOCKERFILE_PATH .
+}
+
+#TODO - unsure if this logic is sound or not
+# Check if the Dockerfile has changed
+if git diff --name-only HEAD~1 | grep -q "$DOCKERFILE_PATH"; then
+    build_docker_image
+else
+    # Check if the Docker image exists
+    if ! docker image inspect $IMAGE_NAME > /dev/null 2>&1; then
+        build_docker_image
+    fi
+fi
+
+# Stash uncommitted changes to avoid scanning them
+STASH_NAME="pre-push-$(date +%s)"
+git stash save --keep-index --include-untracked $STASH_NAME
+
+# Check if there were actually changes stashed
+STASHES=$(git stash list)
+if [[ $STASHES == *"$STASH_NAME"* ]]; then
+  STASHED_CHANGES=true
+fi
+
+# Run TruffleHog on the current directory using the Docker image
+docker run --rm -v "$(pwd)":/data $IMAGE_NAME
+
+# Capture the exit status of TruffleHog
+RESULT=$?
+
+# Pop the stash if there were changes stashed
+if [ "$STASHED_CHANGES" = true ]; then
+  git stash pop
+fi
+
+# Exit with the result of TruffleHog scan
+exit $RESULT

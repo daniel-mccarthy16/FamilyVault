@@ -1,0 +1,30 @@
+#!/bin/bash
+
+. "$(dirname "$0")/_/husky.sh"
+
+# Check for changes in specific directories and run corresponding commands
+echo "Checking for changes..."
+
+# Check for changes in the FamilyVaultCicd directory
+if git diff --cached --name-only | grep -q '^FamilyVaultCicd/'; then
+  echo "Changes detected in FamilyVaultCicd . . ."
+  
+  # Navigate to the FamilyVaultCicd directory
+  cd FamilyVaultCicd
+  
+  # Run prettier-check and capture its exit status
+  if ! npm run prettier-check; then
+    echo "Prettier check failed, aborting commit."
+    exit 1  # Exit with a non-zero status to abort the commit
+  else
+    # If prettier-check succeeds, run lint
+    echo "Prettier check passed, running linter..."
+    if ! npm run lint; then
+      echo "Linting failed, aborting commit."
+      exit 1  # Exit with a non-zero status to abort the commit
+    fi
+  fi
+
+  # Return to the previous directory
+  cd -
+fi

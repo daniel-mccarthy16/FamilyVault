@@ -1,0 +1,15 @@
+{
+  "name": "familyvault",
+  "version": "1.0.0",
+  "description": "family vault root",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "husky": "^9.0.11"
+  },
+  "scripts": {
+    "prepare": "husky"
+  }
+}
