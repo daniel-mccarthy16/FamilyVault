@@ -61,3 +61,4 @@ jobs:
             -H "Authorization: ${{ secrets.AUTHORIZATION_KEY }}" \
             -d '{"action": "trigger"}' \
             ${{ secrets.APIGATEWAY_WEBHOOK_URL }}/react
+
