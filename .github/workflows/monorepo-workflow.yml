@@ -21,6 +21,16 @@ jobs:
         with:
           args: --fail-verified ${{ github.event.repository.default_branch }} HEAD
 
+  debug-job:
+    name: Debug Job
+    runs-on: ubuntu-latest
+    needs: trufflehog-scan
+    steps:
+      - name: Print Event Payload
+        env:
+          GITHUB_EVENT: ${{ toJson(github.event) }}
+        run: echo "GITHUB_EVENT=$GITHUB_EVENT"
+
   cdk-job:
     name: cdk CI/CD
     runs-on: ubuntu-latest
