@@ -6,52 +6,49 @@ on:
       - main
 
 jobs:
+  # Job to detect changes in specific paths
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      cdk-changes: ${{ steps.filter.outputs.cdk }}
+      cicd-changes: ${{ steps.filter.outputs.cicd }}
+      react-changes: ${{ steps.filter.outputs.react }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Paths Filter
+        id: filter
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            cdk:
+              - 'FamilyVaultCdk/**'
+            cicd:
+              - 'FamilyVaultCicd/**'
+            react:
+              - 'FamilyVaultReact/**'
+
+  # Job to run TruffleHog scan
   trufflehog-scan:
     name: TruffleHog Enterprise scan
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0 # Fetch all history so multiple commits can be scanned
+          fetch-depth: 0
       - name: TruffleHog Enterprise scan
         uses: trufflesecurity/TruffleHog-Enterprise-Github-Action@main
         with:
           args: --fail-verified ${{ github.event.repository.default_branch }} HEAD
-      - name: Debug TruffleHog Scan
-        run: echo "TruffleHog scan completed."
 
-  debug-job:
-    name: Debug Job
-    runs-on: ubuntu-latest
-    needs: trufflehog-scan
-    steps:
-      - name: Print Event Payload
-        run: |
-          echo "GITHUB_EVENT_PATH content:"
-          cat $GITHUB_EVENT_PATH
-      - name: Print Commits
-        run: |
-          echo "Printing commit information..."
-          jq '.commits' $GITHUB_EVENT_PATH
-      - name: Print Added Files
-        run: |
-          echo "Printing added files..."
-          jq -r '.commits[] | .added[]?' $GITHUB_EVENT_PATH
-      - name: Print Modified Files
-        run: |
-          echo "Printing modified files..."
-          jq -r '.commits[] | .modified[]?' $GITHUB_EVENT_PATH
-      - name: Print Removed Files
-        run: |
-          echo "Printing removed files..."
-          jq -r '.commits[] | .removed[]?' $GITHUB_EVENT_PATH
-
+  # CDK job
   cdk-job:
     name: CDK CI/CD
     runs-on: ubuntu-latest
-    needs: trufflehog-scan
-    if: ${{ success() && contains(join(github.event.commits[*].message, ' '), 'FamilyVaultCdk/') }}
+    needs: [detect-changes, trufflehog-scan]
+    if: ${{ needs.detect-changes.outputs.cdk-changes == 'true' }}
     steps:
       - name: Call CDK API Gateway
         run: |
@@ -61,11 +58,12 @@ jobs:
             -d '{"action": "trigger"}' \
             ${{ secrets.APIGATEWAY_WEBHOOK_URL }}/cdk
 
+  # CICD job
   cicd-job:
     name: CICD CI/CD
     runs-on: ubuntu-latest
-    needs: trufflehog-scan
-    if: ${{ success() && contains(join(github.event.commits[*].message, ' '), 'FamilyVaultCicd/') }}
+    needs: [detect-changes, trufflehog-scan]
+    if: ${{ needs.detect-changes.outputs.cicd-changes == 'true' }}
     steps:
       - name: Call CICD API Gateway
         run: |
@@ -75,11 +73,12 @@ jobs:
             -d '{"action": "trigger"}' \
             ${{ secrets.APIGATEWAY_WEBHOOK_URL }}/cicd
 
+  # React job
   react-job:
     name: React CI/CD
     runs-on: ubuntu-latest
-    needs: trufflehog-scan
-    if: ${{ success() && contains(join(github.event.commits[*].message, ' '), 'FamilyVaultReact/') }}
+    needs: [detect-changes, trufflehog-scan]
+    if: ${{ needs.detect-changes.outputs.react-changes == 'true' }}
     steps:
       - name: Call React API Gateway
         run: |
