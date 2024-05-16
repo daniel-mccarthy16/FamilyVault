@@ -30,6 +30,22 @@ jobs:
         env:
           GITHUB_EVENT: ${{ toJson(github.event) }}
         run: echo "GITHUB_EVENT=$GITHUB_EVENT"
+      - name: Print Commits
+        run: |
+          echo "Printing commit information..."
+          echo "${{ toJson(github.event.commits) }}"
+      - name: Print Added Files
+        run: |
+          echo "Printing added files..."
+          echo "${{ toJson(github.event.commits.*.added) }}"
+      - name: Print Modified Files
+        run: |
+          echo "Printing modified files..."
+          echo "${{ toJson(github.event.commits.*.modified) }}"
+      - name: Print Removed Files
+        run: |
+          echo "Printing removed files..."
+          echo "${{ toJson(github.event.commits.*.removed) }}"
 
   cdk-job:
     name: cdk CI/CD
