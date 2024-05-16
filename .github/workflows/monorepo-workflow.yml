@@ -50,13 +50,63 @@ jobs:
           for commit in "${{ github.event.commits }}"; do
             for file in "${{ fromJson(commit.modified) }}"; do
               echo "Modified file: $file"
+name: Monorepo CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  trufflehog-scan:
+    name: TruffleHog Enterprise scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Fetch all history so multiple commits can be scanned
+      - name: TruffleHog Enterprise scan
+        uses: trufflesecurity/TruffleHog-Enterprise-Github-Action@main
+        with:
+          args: --fail-verified ${{ github.event.repository.default_branch }} HEAD
+      - name: Debug TruffleHog Scan
+        run: echo "TruffleHog scan completed."
+
+  debug-job:
+    name: Debug Job
+    runs-on: ubuntu-latest
+    needs: trufflehog-scan
+    steps:
+      - name: Print Event Payload
+        env:
+          GITHUB_EVENT: ${{ toJson(github.event) }}
+        run: echo "GITHUB_EVENT=$GITHUB_EVENT"
+      - name: Print Commits
+        run: |
+          echo "Printing commit information..."
+          echo "${{ toJson(github.event.commits) }}"
+      - name: Print Added Files
+        run: |
+          echo "Printing added files..."
+          for commit in "${{ github.event.commits }}"; do
+            for file in $(echo "$commit" | jq -r '.added[]?'); do
+              echo "Added file: $file"
+            done
+          done
+      - name: Print Modified Files
+        run: |
+          echo "Printing modified files..."
+          for commit in "${{ github.event.commits }}"; do
+            for file in $(echo "$commit" | jq -r '.modified[]?'); do
+              echo "Modified file: $file"
             done
           done
       - name: Print Removed Files
         run: |
           echo "Printing removed files..."
           for commit in "${{ github.event.commits }}"; do
-            for file in "${{ fromJson(commit.removed) }}"; do
+            for file in $(echo "$commit" | jq -r '.removed[]?'); do
               echo "Removed file: $file"
             done
           done
@@ -65,7 +115,7 @@ jobs:
     name: CDK CI/CD
     runs-on: ubuntu-latest
     needs: trufflehog-scan
-    if: ${{ success() && contains(github.event.head_commit.message, 'FamilyVaultCdk/') }}
+    if: ${{ success() && (contains(github.event.head_commit.message, 'FamilyVaultCdk/')) }}
     steps:
       - name: Call CDK API Gateway
         run: |
@@ -79,7 +129,7 @@ jobs:
     name: CICD CI/CD
     runs-on: ubuntu-latest
     needs: trufflehog-scan
-    if: ${{ success() && contains(github.event.head_commit.message, 'FamilyVaultCicd/') }}
+    if: ${{ success() && (contains(github.event.head_commit.message, 'FamilyVaultCicd/')) }}
     steps:
       - name: Call CICD API Gateway
         run: |
@@ -93,7 +143,7 @@ jobs:
     name: React CI/CD
     runs-on: ubuntu-latest
     needs: trufflehog-scan
-    if: ${{ success() && contains(github.event.head_commit.message, 'FamilyVaultReact/') }}
+    if: ${{ success() && (contains(github.event.head_commit.message, 'FamilyVaultReact/')) }}
     steps:
       - name: Call React API Gateway
         run: |
