@@ -5,9 +5,7 @@ on:
     branches:
       - main
 
-
 jobs:
-
   trufflehog-scan:
     name: TruffleHog Enterprise scan
     runs-on: ubuntu-latest
@@ -20,6 +18,8 @@ jobs:
         uses: trufflesecurity/TruffleHog-Enterprise-Github-Action@main
         with:
           args: --fail-verified ${{ github.event.repository.default_branch }} HEAD
+      - name: Debug TruffleHog Scan
+        run: echo "TruffleHog scan completed."
 
   debug-job:
     name: Debug Job
@@ -33,38 +33,53 @@ jobs:
       - name: Print Commits
         run: |
           echo "Printing commit information..."
-          echo "${{ toJson(github.event.commits) }}"
+          for commit in "${{ github.event.commits }}"; do
+            echo "$commit"
+          done
       - name: Print Added Files
         run: |
           echo "Printing added files..."
-          echo "${{ toJson(github.event.commits.*.added) }}"
+          for commit in "${{ github.event.commits }}"; do
+            for file in "${{ fromJson(commit.added) }}"; do
+              echo "Added file: $file"
+            done
+          done
       - name: Print Modified Files
         run: |
           echo "Printing modified files..."
-          echo "${{ toJson(github.event.commits.*.modified) }}"
+          for commit in "${{ github.event.commits }}"; do
+            for file in "${{ fromJson(commit.modified) }}"; do
+              echo "Modified file: $file"
+            done
+          done
       - name: Print Removed Files
         run: |
           echo "Printing removed files..."
-          echo "${{ toJson(github.event.commits.*.removed) }}"
+          for commit in "${{ github.event.commits }}"; do
+            for file in "${{ fromJson(commit.removed) }}"; do
+              echo "Removed file: $file"
+            done
+          done
 
   cdk-job:
-    name: cdk CI/CD
+    name: CDK CI/CD
     runs-on: ubuntu-latest
     needs: trufflehog-scan
-    if: ${{ success() && (contains(github.event.commits.*.added, 'FamilyVaultCdk/') || contains(github.event.commits.*.modified, 'FamilyVaultCdk/') || contains(github.event.commits.*.removed, 'FamilyVaultCdk/')) }}
+    if: ${{ success() && contains(github.event.head_commit.message, 'FamilyVaultCdk/') }}
     steps:
-      - name: Call cdk API Gateway
+      - name: Call CDK API Gateway
         run: |
           curl -X POST \
             -H "Content-Type: application/json" \
             -H "Authorization: token ${{ secrets.AUTHORIZATION_KEY }}" \
             -d '{"action": "trigger"}' \
             ${{ secrets.APIGATEWAY_WEBHOOK_URL }}/cdk
+
   cicd-job:
     name: CICD CI/CD
     runs-on: ubuntu-latest
     needs: trufflehog-scan
-    if: ${{ success() && (contains(github.event.commits.*.added, 'FamilyVaultCicd/') || contains(github.event.commits.*.modified, 'FamilyVaultCicd/') || contains(github.event.commits.*.removed, 'FamilyVaultCicd/')) }}
+    if: ${{ success() && contains(github.event.head_commit.message, 'FamilyVaultCicd/') }}
     steps:
       - name: Call CICD API Gateway
         run: |
@@ -78,7 +93,7 @@ jobs:
     name: React CI/CD
     runs-on: ubuntu-latest
     needs: trufflehog-scan
-    if: ${{ success() && (contains(github.event.commits.*.added, 'FamilyVaultReact/') || contains(github.event.commits.*.modified, 'FamilyVaultReact/') || contains(github.event.commits.*.removed, 'FamilyVaultReact/')) }}
+    if: ${{ success() && contains(github.event.head_commit.message, 'FamilyVaultReact/') }}
     steps:
       - name: Call React API Gateway
         run: |
@@ -87,4 +102,3 @@ jobs:
             -H "Authorization: ${{ secrets.AUTHORIZATION_KEY }}" \
             -d '{"action": "trigger"}' \
             ${{ secrets.APIGATEWAY_WEBHOOK_URL }}/react
-
